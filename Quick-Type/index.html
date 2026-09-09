@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>QuickType — Advanced Typing Trainer</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin="">
+
+</head>
+
+
+<body>
+
+<div id="pageCurtain"></div>
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header>
+
+    <div class="logo">
+        Quick<span>Type</span>
+    </div>
+
+    <nav class="nav">
+
+        <button
+            onclick="showPage('home')"
+            id="nav-home">
+            Home
+        </button>
+
+        <button
+            onclick="showPage('tests')"
+            id="nav-tests">
+            Tests
+        </button>
+
+        <button
+            onclick="showPage('tutorial')"
+            id="nav-tutorial">
+            Tutorial
+        </button>
+
+        <button
+            onclick="showPage('practice')"
+            id="nav-practice">
+            Practice
+        </button>
+
+        <button
+            onclick="showPage('progress')"
+            id="nav-progress">
+            Progress
+        </button>
+
+        <button
+            onclick="showPage('achievements')"
+            id="nav-achievements">
+            🏆 Achievements
+        </button>
+
+        <button
+            onclick="showPage('about')"
+            id="nav-about">
+            About
+        </button>
+
+        <button
+            onclick="showPage('feedback')"
+            id="nav-feedback">
+            Feedback
+        </button>
+
+        <button
+            onclick="showPage('map')"
+            id="nav-map">
+            🗺️ Map
+        </button>
+
+        <button
+            class="btn btn-secondary"
+            style="padding:9px 16px;margin-left:4px"
+            onclick="showPage('login')"
+            id="nav-login">
+            Login
+        </button>
+
+    </nav>
+
+    <div class="header-extras">
+
+        <div class="streak-pill" id="streakPill" title="Consecutive days practiced">
+            🔥 <span id="streakCount">0</span> day streak
+        </div>
+
+        <div class="theme-swatches" id="themeSwatches" title="Choose an accent theme">
+            <button class="swatch" data-theme="indigo" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)"></button>
+            <button class="swatch" data-theme="cyan" style="background:linear-gradient(135deg,#06b6d4,#22d3ee)"></button>
+            <button class="swatch" data-theme="pink" style="background:linear-gradient(135deg,#ec4899,#f472b6)"></button>
+            <button class="swatch" data-theme="green" style="background:linear-gradient(135deg,#22c55e,#4ade80)"></button>
+            <button class="swatch" data-theme="amber" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"></button>
+        </div>
+
+    </div>
+
+    <button
+        class="mobile-menu"
+        onclick="toggleMobileMenu()">
+        ☰
+    </button>
+
+</header>
+
+
+<!-- =====================================================
+     HOME
+===================================================== -->
+
+<section
+    id="home"
+    class="page active">
+
+    <div class="landing">
+
+        <!-- HERO -->
+        <div class="landing-hero reveal">
+
+            <div class="landing-blob" style="width:180px;height:180px;background:#f6d75b;top:-60px;right:60px;"></div>
+            <div class="landing-blob" style="width:140px;height:140px;background:#8fd9c4;bottom:-40px;left:-40px;animation-delay:1.5s;"></div>
+
+            <div class="landing-hero-copy">
+
+                <div class="landing-pill">
+                    <span class="dot"></span>
+                    Your daily speed boost
+                </div>
+
+                <h1>
+                    type like<br>
+                    <span class="lh-pink">you mean it.</span>
+                </h1>
+
+                <p class="landing-sub">
+                    A focused typing arcade for real gains. Find your
+                    rhythm, chase your best score, and make the keyboard
+                    feel like home — with an AI coach nudging you along
+                    the way.
+                </p>
+
+                <div class="landing-cta-row">
+
+                    <button
+                        class="btn-land btn-land-primary"
+                        onclick="startTimedTest(60)">
+                        Start a quick test →
+                    </button>
+
+                    <button
+                        class="btn-land btn-land-secondary"
+                        onclick="showPage('practice')">
+                        Explore practice
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="landing-hero-visual">
+
+                <div class="landing-hero-card">
+
+                    <h2>Your keyboard gym 🏋️</h2>
+
+                    <p>
+                        Train one key at a time or challenge your
+                        entire keyboard.
+                    </p>
+
+                    <div class="hero-keyboard">
+
+                        <div class="mini-key">Q</div>
+                        <div class="mini-key">W</div>
+                        <div class="mini-key">E</div>
+                        <div class="mini-key">R</div>
+                        <div class="mini-key">T</div>
+                        <div class="mini-key">Y</div>
+                        <div class="mini-key">U</div>
+                        <div class="mini-key">I</div>
+                        <div class="mini-key">O</div>
+                        <div class="mini-key">P</div>
+
+                        <div class="mini-key">A</div>
+                        <div class="mini-key">S</div>
+                        <div class="mini-key">D</div>
+                        <div class="mini-key">F</div>
+                        <div class="mini-key">G</div>
+                        <div class="mini-key">H</div>
+                        <div class="mini-key">J</div>
+                        <div class="mini-key">K</div>
+                        <div class="mini-key">L</div>
+                        <div class="mini-key">;</div>
+
+                        <div class="mini-key">Z</div>
+                        <div class="mini-key">X</div>
+                        <div class="mini-key">C</div>
+                        <div class="mini-key">V</div>
+                        <div class="mini-key">B</div>
+                        <div class="mini-key">N</div>
+                        <div class="mini-key">M</div>
+                        <div class="mini-key">,</div>
+                        <div class="mini-key">.</div>
+                        <div class="mini-key">/</div>
+
+                    </div>
+
+                    <div class="landing-hero-stat">
+                        <span id="homeBest">Best WPM: 0</span>
+                        <span id="homeAccuracy">Best Accuracy: 100%</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MARQUEE -->
+        <div class="landing-marquee reveal">
+            <div class="landing-marquee-track">
+                <span>⚡ A superpower</span>
+                <span>🎯 One more round</span>
+                <span>⌨️ Type like you mean it</span>
+                <span>🔥 Keep the streak alive</span>
+                <span>⚡ A superpower</span>
+                <span>🎯 One more round</span>
+                <span>⌨️ Type like you mean it</span>
+                <span>🔥 Keep the streak alive</span>
+            </div>
+        </div>
+
+
+        <!-- FEATURE CARDS -->
+        <div class="landing-features">
+
+            <div class="feature-card fc-pink reveal" onclick="showPage('tests')">
+                <div class="fc-num">01</div>
+                <div class="fc-icon">⏱️</div>
+                <h3>Pick a pace</h3>
+                <p>15, 30 or 60 seconds. Start where your fingers are today.</p>
+            </div>
+
+            <div class="feature-card fc-yellow reveal" onclick="showPage('practice')">
+                <div class="fc-num">02</div>
+                <div class="fc-icon">⚡</div>
+                <h3>Find the flow</h3>
+                <p>Words roll in. Your only job is to keep the rhythm moving.</p>
+            </div>
+
+            <div class="feature-card fc-mint reveal" onclick="showPage('progress')">
+                <div class="fc-num">03</div>
+                <div class="fc-icon">🎯</div>
+                <h3>Beat yourself</h3>
+                <p>See the score, take the win, and come back for one more.</p>
+            </div>
+
+        </div>
+
+
+        <!-- DARK STATS CTA BAND -->
+        <div class="landing-stats-band reveal">
+
+            <div>
+                <h2>Practice<br>has <span class="accent">range.</span></h2>
+                <p>
+                    Tiny daily reps add up. Keep a streak, watch your
+                    accuracy climb, and collect proof that you're
+                    getting faster.
+                </p>
+
+                <div class="landing-cta-row">
+                    <button class="btn-land btn-land-primary" onclick="startTimedTest(60)">
+                        Start your streak →
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-chart-card">
+
+                <div class="chip-bubble" id="homeStreakBubble">look at you go</div>
+
+                <div class="stats-chart-head">
+                    <span>Weekly rhythm</span>
+                    <span class="streak-chip" id="homeStreakChip">0 day streak</span>
+                </div>
+
+                <div class="chart-bars" id="homeChartBars"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- AI COACH -->
+        <div class="landing-ai reveal">
+
+            <div class="landing-ai-icon">✨</div>
+
+            <div>
+                <div class="landing-ai-label">AI Coach</div>
+                <div class="landing-ai-tip" id="aiCoachTip">
+                    Run a quick test and I'll start spotting patterns in your typing.
+                </div>
+            </div>
+
+            <button class="btn-ai-refresh" onclick="refreshAiCoachTip()">
+                New tip ↻
+            </button>
+
+        </div>
+
+
+        <!-- DAILY GOAL SLIDER -->
+        <div class="landing-goal reveal">
+
+            <div class="goal-head">
+                <div>
+                    <div class="landing-ai-label">Daily WPM Goal</div>
+                    <div class="goal-value"><span id="goalValue">40</span> WPM</div>
+                </div>
+
+                <div class="goal-progress-chip" id="goalProgressChip">0%</div>
+            </div>
+
+            <input
+                type="range"
+                id="goalSlider"
+                class="goal-slider"
+                min="10"
+                max="120"
+                step="5"
+                value="40"
+                oninput="onGoalSliderInput(this.value)">
+
+            <div class="goal-scale">
+                <span>10</span>
+                <span>120</span>
+            </div>
+
+            <div class="goal-progress-track">
+                <div class="goal-progress-fill" id="goalProgressFill"></div>
+            </div>
+
+            <p class="goal-hint" id="goalHint">
+                Set a target and I'll track how close your recent runs get.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     TESTS
+===================================================== -->
+
+<section
+    id="tests"
+    class="page">
+
+    <div class="section-header">
+
+        <div class="page-kicker kicker-tests">⌨️ SPEED TEST</div>
+        <h1>Typing Tests</h1>
+
+        <p>
+            Measure your real typing speed and accuracy.
+        </p>
+
+    </div>
+
+    <div class="test-options">
+
+        <div class="card test-option">
+
+            <div class="big">1</div>
+
+            <h3>1 Minute</h3>
+
+            <p>
+                Quick speed challenge.
+            </p>
+
+            <button
+                class="btn btn-primary"
+                onclick="startTimedTest(60)">
+                Start Test
+            </button>
+
+        </div>
+
+
+        <div class="card test-option">
+
+            <div class="big">3</div>
+
+            <h3>3 Minutes</h3>
+
+            <p>
+                Balanced typing challenge.
+            </p>
+
+            <button
+                class="btn btn-primary"
+                onclick="startTimedTest(180)">
+                Start Test
+            </button>
+
+        </div>
+
+
+        <div class="card test-option">
+
+            <div class="big">5</div>
+
+            <h3>5 Minutes</h3>
+
+            <p>
+                Full endurance challenge.
+            </p>
+
+            <button
+                class="btn btn-primary"
+                onclick="startTimedTest(300)">
+                Start Test
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ACTIVE TEST
+===================================================== -->
+
+<section
+    id="typingTest"
+    class="page">
+
+    <div class="card">
+
+        <div class="test-header">
+
+            <div class="test-header-left">
+
+                <h2 id="testTitle">
+                    1 Minute Typing Test
+                </h2>
+
+                <p>
+                    Start typing to begin the timer.
+                </p>
+
+            </div>
+
+            <div class="test-controls">
+
+                <button
+                    class="btn btn-secondary"
+                    onclick="newTest()">
+                    ↻ Redo
+                </button>
+
+                <button
+                    class="btn btn-secondary"
+                    id="soundBtn"
+                    onclick="toggleSound()">
+                    🔊 Sound
+                </button>
+
+                <button
+                    class="btn btn-secondary"
+                    id="readAloudBtn"
+                    onclick="toggleReadAloud()">
+                    🔈 Read
+                </button>
+
+                <div
+                    class="timer"
+                    id="timer">
+                    1:00
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="test-body">
+
+            <div
+                class="reference-text"
+                id="referenceText">
+            </div>
+
+            <textarea
+                id="typingInput"
+                placeholder="Start typing here..."
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false">
+            </textarea>
+
+            <div class="live-stats">
+
+                <div class="stat">
+                    <div class="stat-label">WPM</div>
+                    <div
+                        class="stat-value"
+                        id="liveWpm">
+                        0
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-label">Accuracy</div>
+                    <div
+                        class="stat-value accuracy-value"
+                        id="liveAccuracy">
+                        100%
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-label">Time</div>
+                    <div
+                        class="stat-value"
+                        id="liveTime">
+                        1:00
+                    </div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-label">Characters</div>
+                    <div
+                        class="stat-value"
+                        id="liveCharacters">
+                        0
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="test-actions">
+
+                <button
+                    class="btn btn-primary"
+                    onclick="focusTyping()">
+                    Start Typing
+                </button>
+
+                <button
+                    class="btn btn-secondary"
+                    onclick="newTest()">
+                    Restart
+                </button>
+
+            </div>
+
+
+            <div
+                class="card result"
+                id="result"
+                style="display:none">
+
+                <h2>
+                    Test Complete 🎉
+                </h2>
+
+                <p
+                    style="color:var(--muted);margin-top:8px">
+                    Here is your final performance.
+                </p>
+
+                <div class="result-grid">
+
+                    <div class="result-item">
+                        <small>WPM</small>
+                        <strong id="finalWpm">0</strong>
+                    </div>
+
+                    <div class="result-item">
+                        <small>Accuracy</small>
+                        <strong id="finalAccuracy">
+                            100%
+                        </strong>
+                    </div>
+
+                    <div class="result-item">
+                        <small>Correct</small>
+                        <strong id="finalCorrect">0</strong>
+                    </div>
+
+                    <div class="result-item">
+                        <small>Errors</small>
+                        <strong id="finalErrors">0</strong>
+                    </div>
+
+                </div>
+
+                <div
+                    class="hero-buttons"
+                    style="justify-content:center">
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="newTest()">
+                        Try Again
+                    </button>
+
+                    <button
+                        class="btn btn-secondary"
+                        onclick="showCertificate()">
+                        Certificate
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     TUTORIAL
+===================================================== -->
+
+<section
+    id="tutorial"
+    class="page">
+
+    <div class="section-header">
+
+        <div class="page-kicker kicker-tutorial">🎓 LEARN</div>
+        <h1>Typing Tutorial</h1>
+
+        <p>
+            Build proper typing technique from the ground up.
+        </p>
+
+    </div>
+
+    <div class="card tutorial-card">
+
+        <div
+            class="tutorial-progress"
+            id="tutorialProgress">
+        </div>
+
+        <div
+            class="tutorial-screen"
+            id="tutorialScreen">
+        </div>
+
+        <div class="tutorial-actions">
+
+            <button
+                class="btn btn-secondary"
+                onclick="previousTutorial()">
+                ← Back
+            </button>
+
+            <button
+                class="btn btn-primary"
+                id="tutorialNext"
+                onclick="nextTutorial()">
+                Continue →
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ADVANCED PRACTICE
+===================================================== -->
+
+<section
+    id="practice"
+    class="page">
+
+    <div class="section-header">
+
+        <div class="page-kicker kicker-practice">🏋️ DRILL</div>
+        <h1>Keyboard Practice Lab</h1>
+
+        <p>
+            Train specific keyboard zones, hands, numbers,
+            symbols and the complete keyboard.
+        </p>
+
+    </div>
+
+
+    <div class="practice-layout">
+
+
+        <!-- =============================================
+             PRACTICE MENU
+        ============================================== -->
+
+        <aside class="card practice-menu">
+
+            <div class="practice-menu-title">
+                Practice Sections
+            </div>
+
+
+            <button
+                class="practice-category active"
+                data-mode="all"
+                onclick="selectPractice('all')">
+
+                <span class="category-icon">⌨️</span>
+
+                <span>
+                    All Keys
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="left"
+                onclick="selectPractice('left')">
+
+                <span class="category-icon">👈</span>
+
+                <span>
+                    Left Hand
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="right"
+                onclick="selectPractice('right')">
+
+                <span class="category-icon">👉</span>
+
+                <span>
+                    Right Hand
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="home"
+                onclick="selectPractice('home')">
+
+                <span class="category-icon">🏠</span>
+
+                <span>
+                    Home Row
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="top"
+                onclick="selectPractice('top')">
+
+                <span class="category-icon">⬆️</span>
+
+                <span>
+                    Top Row
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="bottom"
+                onclick="selectPractice('bottom')">
+
+                <span class="category-icon">⬇️</span>
+
+                <span>
+                    Bottom Row
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="numbers"
+                onclick="selectPractice('numbers')">
+
+                <span class="category-icon">🔢</span>
+
+                <span>
+                    Number Row
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="numpad"
+                onclick="selectPractice('numpad')">
+
+                <span class="category-icon">🔟</span>
+
+                <span>
+                    Numpad
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="shift"
+                onclick="selectPractice('shift')">
+
+                <span class="category-icon">⇧</span>
+
+                <span>
+                    Shift / Capitals
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="symbols"
+                onclick="selectPractice('symbols')">
+
+                <span class="category-icon">#</span>
+
+                <span>
+                    Symbols
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="mixed"
+                onclick="selectPractice('mixed')">
+
+                <span class="category-icon">🧩</span>
+
+                <span>
+                    Mixed
+                </span>
+
+            </button>
+
+
+            <button
+                class="practice-category"
+                data-mode="speed"
+                onclick="selectPractice('speed')">
+
+                <span class="category-icon">⚡</span>
+
+                <span>
+                    Speed Burst
+                </span>
+
+            </button>
+
+        </aside>
+
+
+        <!-- =============================================
+             PRACTICE MAIN
+        ============================================== -->
+
+        <main class="practice-main">
+
+            <div class="card practice-header">
+
+                <div>
+
+                    <h2 id="practiceTitle">
+                        All Keys Practice
+                    </h2>
+
+                    <p id="practiceDescription">
+                        Train your complete keyboard.
+                    </p>
+
+                </div>
+
+
+                <div class="practice-meta">
+
+                    <span
+                        class="practice-pill"
+                        id="practiceModePill">
+                        ALL KEYS
+                    </span>
+
+                    <span
+                        class="practice-pill"
+                        id="practiceGoalPill">
+                        Accuracy
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="card practice-box">
+
+                <div
+                    class="practice-target"
+                    id="practiceTarget">
+                </div>
+
+
+                <input
+                    id="practiceInput"
+                    type="text"
+                    placeholder="Type the pattern above..."
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false">
+
+
+                <div class="practice-live-stats">
+
+                    <div class="practice-stat">
+
+                        <small>WPM</small>
+
+                        <strong id="practiceWpm">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="practice-stat">
+
+                        <small>Accuracy</small>
+
+                        <strong
+                            id="practiceAccuracy">
+                            100%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="practice-stat">
+
+                        <small>Correct</small>
+
+                        <strong id="practiceCorrect">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="practice-stat">
+
+                        <small>Errors</small>
+
+                        <strong id="practiceErrors">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="progress-track">
+
+                    <div
+                        class="progress-fill"
+                        id="practiceProgress">
+                    </div>
+
+                </div>
+
+
+                <div class="practice-controls">
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="focusPractice()">
+                        Start Practice
+                    </button>
+
+                    <button
+                        class="btn btn-secondary"
+                        onclick="resetPractice()">
+                        ↻ New Pattern
+                    </button>
+
+                    <button
+                        class="btn btn-secondary"
+                        onclick="togglePracticeSound()"
+                        id="practiceSoundBtn">
+                        🔊 Sound
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="mode-info"
+                    id="practiceInfo">
+                    Start typing to train your complete keyboard.
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 INTERACTIVE KEYBOARD
+            ========================================== -->
+
+            <div class="card keyboard-wrapper">
+
+                <div class="keyboard-title">
+
+                    <strong>
+                        Interactive Keyboard
+                    </strong>
+
+                    <span>
+                        Your next key lights up automatically
+                    </span>
+
+                </div>
+
+
+                <div class="keyboard">
+
+                    <!-- NUMBER ROW -->
+
+                    <div class="keyboard-row">
+
+                        <div class="key" data-key="`">`</div>
+                        <div class="key" data-key="1">1</div>
+                        <div class="key" data-key="2">2</div>
+                        <div class="key" data-key="3">3</div>
+                        <div class="key" data-key="4">4</div>
+                        <div class="key" data-key="5">5</div>
+                        <div class="key" data-key="6">6</div>
+                        <div class="key" data-key="7">7</div>
+                        <div class="key" data-key="8">8</div>
+                        <div class="key" data-key="9">9</div>
+                        <div class="key" data-key="0">0</div>
+                        <div class="key" data-key="-">-</div>
+                        <div class="key" data-key="=">=</div>
+                        <div class="key wide" data-key="backspace">⌫</div>
+
+                    </div>
+
+
+                    <!-- Q ROW -->
+
+                    <div class="keyboard-row">
+
+                        <div class="key wide" data-key="tab">Tab</div>
+                        <div class="key" data-key="q">Q</div>
+                        <div class="key" data-key="w">W</div>
+                        <div class="key" data-key="e">E</div>
+                        <div class="key" data-key="r">R</div>
+                        <div class="key" data-key="t">T</div>
+                        <div class="key" data-key="y">Y</div>
+                        <div class="key" data-key="u">U</div>
+                        <div class="key" data-key="i">I</div>
+                        <div class="key" data-key="o">O</div>
+                        <div class="key" data-key="p">P</div>
+                        <div class="key" data-key="[">[</div>
+                        <div class="key" data-key="]">]</div>
+                        <div class="key" data-key="\">\</div>
+
+                    </div>
+
+
+                    <!-- HOME ROW -->
+
+                    <div class="keyboard-row">
+
+                        <div class="key wide" data-key="capslock">
+                            Caps
+                        </div>
+
+                        <div class="key" data-key="a">A</div>
+                        <div class="key" data-key="s">S</div>
+                        <div class="key" data-key="d">D</div>
+                        <div class="key" data-key="f">F</div>
+                        <div class="key" data-key="g">G</div>
+                        <div class="key" data-key="h">H</div>
+                        <div class="key" data-key="j">J</div>
+                        <div class="key" data-key="k">K</div>
+                        <div class="key" data-key="l">L</div>
+                        <div class="key" data-key=";">;</div>
+                        <div class="key" data-key="'">'</div>
+
+                        <div
+                            class="key wide"
+                            data-key="enter">
+                            Enter
+                        </div>
+
+                    </div>
+
+
+                    <!-- BOTTOM ROW -->
+
+                    <div class="keyboard-row">
+
+                        <div
+                            class="key xwide"
+                            data-key="shift">
+                            Shift
+                        </div>
+
+                        <div class="key" data-key="z">Z</div>
+                        <div class="key" data-key="x">X</div>
+                        <div class="key" data-key="c">C</div>
+                        <div class="key" data-key="v">V</div>
+                        <div class="key" data-key="b">B</div>
+                        <div class="key" data-key="n">N</div>
+                        <div class="key" data-key="m">M</div>
+                        <div class="key" data-key=",">,</div>
+                        <div class="key" data-key=".">.</div>
+                        <div class="key" data-key="/">/</div>
+
+                        <div
+                            class="key xwide"
+                            data-key="shift">
+                            Shift
+                        </div>
+
+                    </div>
+
+
+                    <!-- SPACE -->
+
+                    <div class="keyboard-row">
+
+                        <div class="key" data-key="ctrl">
+                            Ctrl
+                        </div>
+
+                        <div class="key" data-key="alt">
+                            Alt
+                        </div>
+
+                        <div
+                            class="key space"
+                            data-key=" ">
+                            SPACE
+                        </div>
+
+                        <div class="key" data-key="alt">
+                            Alt
+                        </div>
+
+                        <div class="key" data-key="ctrl">
+                            Ctrl
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 NUMPAD
+            ========================================== -->
+
+            <div
+                class="card keyboard-wrapper"
+                id="numpadPanel">
+
+                <div class="keyboard-title">
+
+                    <strong>
+                        Numeric Keypad
+                    </strong>
+
+                    <span>
+                        Dedicated number practice
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="keyboard"
+                    style="max-width:500px;margin:auto">
+
+                    <div class="keyboard-row">
+
+                        <div class="key" data-key="num7">
+                            7
+                        </div>
+
+                        <div class="key" data-key="num8">
+                            8
+                        </div>
+
+                        <div class="key" data-key="num9">
+                            9
+                        </div>
+
+                        <div class="key" data-key="/">
+                            /
+                        </div>
+
+                    </div>
+
+
+                    <div class="keyboard-row">
+
+                        <div class="key" data-key="num4">
+                            4
+                        </div>
+
+                        <div class="key" data-key="num5">
+                            5
+                        </div>
+
+                        <div class="key" data-key="num6">
+                            6
+                        </div>
+
+                        <div class="key" data-key="*">
+                            *
+                        </div>
+
+                    </div>
+
+
+                    <div class="keyboard-row">
+
+                        <div class="key" data-key="num1">
+                            1
+                        </div>
+
+                        <div class="key" data-key="num2">
+                            2
+                        </div>
+
+                        <div class="key" data-key="num3">
+                            3
+                        </div>
+
+                        <div class="key" data-key="-">
+                            -
+                        </div>
+
+                    </div>
+
+
+                    <div class="keyboard-row">
+
+                        <div
+                            class="key"
+                            data-key="num0">
+                            0
+                        </div>
+
+                        <div
+                            class="key"
+                            data-key=".">
+                            .
+                        </div>
+
+                        <div
+                            class="key"
+                            data-key="+">
+                            +
+                        </div>
+
+                        <div
+                            class="key"
+                            data-key="enter">
+                            Enter
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 PROBLEM KEYS
+            ========================================== -->
+
+            <div class="card problem-section">
+
+                <h2>
+                    Your Problem Keys
+                </h2>
+
+                <p
+                    style="
+                        color:var(--muted);
+                        margin-top:7px
+                    ">
+                    Keys where you make the most mistakes.
+                </p>
+
+                <div
+                    class="problem-grid"
+                    id="problemKeys">
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     PROGRESS
+===================================================== -->
+
+<section
+    id="progress"
+    class="page">
+
+    <div class="section-header">
+
+        <div class="page-kicker kicker-progress">📊 ANALYTICS</div>
+        <h1>Your Progress</h1>
+
+        <p>
+            See how your typing performance is improving.
+        </p>
+
+    </div>
+
+
+    <div class="dashboard-stats">
+
+        <div class="dashboard-stat">
+
+            <small>
+                Best WPM
+            </small>
+
+            <strong id="progressBestWpm">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="dashboard-stat">
+
+            <small>
+                Best Accuracy
+            </small>
+
+            <strong id="progressBestAccuracy">
+                0%
+            </strong>
+
+        </div>
+
+
+        <div class="dashboard-stat">
+
+            <small>
+                Tests
+            </small>
+
+            <strong id="progressTests">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="dashboard-stat">
+
+            <small>
+                Practice Sessions
+            </small>
+
+            <strong id="progressPractice">
+                0
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="card"
+        style="padding:20px">
+
+        <div
+            class="history-list"
+            id="historyList">
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     CERTIFICATE
+===================================================== -->
+
+<section
+    id="certificate"
+    class="page">
+
+    <div class="section-header">
+
+        <div class="page-kicker kicker-certificate">🎖️ CEREMONY</div>
+        <h1>Certificate</h1>
+
+        <p>
+            Your typing achievement.
+        </p>
+
+    </div>
+
+
+    <div
+        class="certificate"
+        id="certificateContent">
+
+        <p>
+            QUICKTYPE
+        </p>
+
+        <h1>
+            Certificate
+        </h1>
+
+        <h2>
+            Typing Achievement
+        </h2>
+
+        <p
+            style="margin-top:20px;color:#64748b">
+
+            This certifies that the user successfully
+            completed a QuickType typing test.
+
+        </p>
+
+        <div
+            class="certificate-score"
+            id="certificateScore">
+
+            0 WPM
+
+        </div>
+
+        <h3 id="certificateAccuracy">
+            100% Accuracy
+        </h3>
+
+        <p
+            id="certificateDate"
+            style="margin-top:20px;color:#64748b">
+        </p>
+
+    </div>
+
+
+    <div
+        style="
+            text-align:center;
+            margin-top:20px
+        ">
+
+        <button
+            class="btn btn-primary"
+            onclick="window.print()">
+
+            🖨 Print Certificate
+
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ACHIEVEMENTS
+===================================================== -->
+
+<section
+    id="achievements"
+    class="page">
+
+    <div class="section-header">
+
+        <div class="page-kicker kicker-achievements">🏆 REWARDS</div>
+        <h1>Achievements</h1>
+
+        <p>
+            Unlock badges as you build your typing skills. Keep testing,
+            practicing, and coming back daily to fill the board.
+        </p>
+
+    </div>
+
+    <div class="dashboard-stats" style="margin-bottom:25px">
+
+        <div class="dashboard-stat">
+            <small>Badges Unlocked</small>
+            <strong id="achUnlocked">0</strong>
+        </div>
+
+        <div class="dashboard-stat">
+            <small>Total Badges</small>
+            <strong id="achTotal">0</strong>
+        </div>
+
+        <div class="dashboard-stat">
+            <small>Current Streak</small>
+            <strong id="achStreak">0 days</strong>
+        </div>
+
+        <div class="dashboard-stat">
+            <small>Longest Streak</small>
+            <strong id="achLongestStreak">0 days</strong>
+        </div>
+
+    </div>
+
+    <div class="badge-grid" id="badgeGrid"></div>
+
+</section>
+
+
+<!-- =====================================================
+     ABOUT
+===================================================== -->
+
+<section
+    id="about"
+    class="page">
+
+    <div class="section-header">
+        <div class="page-kicker kicker-about">ℹ️ INFO</div>
+        <h1>About QuickType</h1>
+        <p>A focused typing platform designed for measurable improvement.</p>
+    </div>
+
+    <div class="about-grid">
+
+        <div class="about-card">
+            <h2>What is QuickType?</h2>
+            <p>
+                QuickType is a modern typing practice platform built to help
+                students, professionals and everyday computer users build
+                speed, accuracy and keyboard confidence — with tests,
+                guided tutorials, targeted practice drills and progress
+                tracking all in one place.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <h2>Performance-Based WPM</h2>
+            <p>
+                Speed is calculated using the standard convention where five
+                correctly typed characters count as one word, measured
+                against your actual elapsed typing time for an accurate,
+                real-time WPM.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <h2>Why Practice Consistently?</h2>
+            <p>
+                Regular practice builds muscle memory, reduces mistakes and
+                helps you finish digital work faster. Keep your daily streak
+                alive and unlock achievement badges as you improve.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <h2>Adaptive Practice Passages</h2>
+            <p>
+                QuickType includes several timed tests, key-specific drills
+                and a tutorial mode — start a new test whenever you want a
+                fresh challenge.
+            </p>
+        </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:30px">
+        <button class="btn btn-primary" onclick="showPage('typingTest')">
+            Start Practicing →
+        </button>
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FEEDBACK
+===================================================== -->
+
+<section
+    id="feedback"
+    class="page">
+
+    <div class="section-header">
+        <div class="page-kicker kicker-feedback">💬 VOICE</div>
+        <h1>Feedback</h1>
+        <p>Share your experience, suggestions, or ideas to help us improve QuickType.</p>
+    </div>
+
+    <div class="form-card">
+
+        <form onsubmit="submitFeedback(event)">
+
+            <label>Name</label>
+            <input type="text" placeholder="Enter your name" required>
+
+            <label>Email</label>
+            <input type="email" placeholder="Enter your email" required>
+
+            <label>Feedback</label>
+            <textarea placeholder="Write your feedback here..." required></textarea>
+
+            <div style="text-align:center;margin-top:22px">
+                <button class="btn btn-primary" type="submit">
+                    Submit Feedback
+                </button>
+            </div>
+
+        </form>
+
+        <div id="feedbackMessage" class="form-message"></div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:20px">
+        <button class="btn btn-secondary" onclick="showPage('home')">
+            ← Back to Home
+        </button>
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     LOGIN
+===================================================== -->
+
+<section
+    id="login"
+    class="page">
+
+    <div class="login-container">
+
+        <div class="login-card">
+
+            <div class="login-logo">QuickType</div>
+            <div class="page-kicker kicker-login" style="justify-content:center;margin:0 auto 10px">🔐 SECURE ACCESS</div>
+            <div class="login-subtitle">Access your QuickType workspace</div>
+
+            <div class="form-card">
+
+                <form id="loginForm">
+
+                    <label>Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
+
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+
+                    <button type="submit" class="btn btn-primary login-button">
+                        Login
+                    </button>
+
+                </form>
+
+                <div id="loginMessage" class="form-message"></div>
+
+                <div class="demo-note">
+                    <strong>Demo Login</strong><br>
+                    Email: admin@gmail.com<br>
+                    Password: 12345
+                </div>
+
+            </div>
+
+            <div style="text-align:center;margin-top:20px">
+                <button class="btn btn-secondary" onclick="showPage('home')">
+                    ← Back to Home
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MAP
+===================================================== -->
+
+<section
+    id="map"
+    class="page">
+
+    <div class="section-header">
+        <div class="page-kicker kicker-map">🗺️ EXPLORE</div>
+        <h1>Interactive Map</h1>
+        <p>Explore locations using the controls on the left.</p>
+    </div>
+
+    <div class="map-layout">
+
+        <aside class="map-sidebar">
+
+            <h2>Map Controls</h2>
+            <p>Select a location or use your current position.</p>
+
+            <div class="map-buttons">
+
+                <button type="button" class="map-btn primary" onclick="goToIndia()">
+                    🇮🇳 India
+                </button>
+
+                <button type="button" class="map-btn" onclick="goToAhmedabad()">
+                    📍 Ahmedabad
+                </button>
+
+                <button type="button" class="map-btn" onclick="findMyLocation()">
+                    🎯 My Location
+                </button>
+
+                <button type="button" class="map-btn" onclick="resetMap()">
+                    ↺ Reset Map
+                </button>
+
+            </div>
+
+            <div class="map-info" id="mapInfo">
+                <strong>Selected: India</strong><br>
+                Use the buttons to move around the map.
+            </div>
+
+        </aside>
+
+        <section class="map-wrapper">
+            <div id="quickTypeMap"></div>
+        </section>
+
+    </div>
+
+</section>
+
+
+<footer>
+
+    © 2026 QuickType —
+    Advanced Typing Practice Lab
+
+</footer>
+
+
+<canvas id="confettiCanvas"></canvas>
+
+<div
+    class="toast"
+    id="toast">
+
+    Saved
+
+</div>
+
+<div class="achievement-popup" id="achievementPopup">
+    <div class="achievement-popup-icon" id="achievementPopupIcon">🏆</div>
+    <div>
+        <div class="achievement-popup-title">Achievement Unlocked!</div>
+        <div class="achievement-popup-name" id="achievementPopupName"></div>
+    </div>
+</div>
+
+
+<!-- =========================================================
+     ISHAN EDITION — THEMES, STREAKS, BADGES & CONFETTI
+     Layered on top of QuickType without touching the core
+     typing engine above.
+========================================================= -->
+
+
+<!-- =========================================================
+     ABOUT / FEEDBACK / LOGIN / MAP — SUPPORTING FEATURES
+========================================================= -->
+
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin="">
+</script>
+
+
+<!-- =====================================================
+     LANDING MOTION + AI COACH + HASH ROUTING
+===================================================== -->
+
+<script src="js/script.js"></script>
+
+
+</body>
+</html>
