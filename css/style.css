@@ -2422,32 +2422,18 @@ body.page-home{
 
 /* =========================================================
    SCROLL-REVEAL MOTION UTILITY
-
-   Pure CSS — plays automatically the moment an element renders.
-   Content is NEVER dependent on JavaScript running successfully;
-   JS (observeReveals) only adds a little extra polish for
-   elements the user scrolls to later, it is not required for
-   the page to be visible at all.
 ========================================================= */
 
 .reveal{
-    animation:revealIn .7s cubic-bezier(.2,.7,.3,1) both;
+    opacity:0;
+    transform:translateY(26px);
+    transition:opacity .6s cubic-bezier(.2,.7,.3,1), transform .6s cubic-bezier(.2,.7,.3,1);
 }
 
-@keyframes revealIn{
-    from{
-        opacity:0;
-        transform:translateY(26px);
-    }
-    to{
-        opacity:1;
-        transform:none;
-    }
+.reveal.in-view{
+    opacity:1;
+    transform:none;
 }
-
-.landing-features .feature-card:nth-child(1){ animation-delay:.05s; }
-.landing-features .feature-card:nth-child(2){ animation-delay:.15s; }
-.landing-features .feature-card:nth-child(3){ animation-delay:.25s; }
 
 
 /* =========================================================
@@ -2758,6 +2744,117 @@ body.page-home{
 @keyframes marqueeScroll{
     from{ transform:translateX(0); }
     to{ transform:translateX(-50%); }
+}
+
+
+/* ---- image slider ---- */
+
+.image-slider{
+    max-width:520px;
+    margin:0 auto;
+}
+
+.slider-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+
+    color:var(--muted);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+
+.slider-counter{
+    color:#cbd5e1;
+}
+
+.slider-frame{
+    position:relative;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:18px;
+    overflow:hidden;
+
+    background:#0b1120;
+    border:1px solid var(--border);
+}
+
+.slider-image{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+
+    display:block;
+
+    transition:opacity .2s ease;
+}
+
+.slider-btn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+
+    width:38px;
+    height:38px;
+
+    border:0;
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(7,11,23,.65);
+    color:white;
+
+    font-size:22px;
+    line-height:1;
+
+    backdrop-filter:blur(6px);
+
+    transition:.2s;
+}
+
+.slider-btn:hover{
+    background:rgba(99,102,241,.65);
+    transform:translateY(-50%) scale(1.08);
+}
+
+.slider-prev{ left:12px; }
+.slider-next{ right:12px; }
+
+.slider-dots{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+
+    margin-top:12px;
+}
+
+.slider-dot{
+    width:8px;
+    height:8px;
+
+    border-radius:50%;
+    border:0;
+
+    background:rgba(255,255,255,.2);
+
+    padding:0;
+
+    transition:.2s;
+}
+
+.slider-dot.active{
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    width:22px;
+    border-radius:999px;
 }
 
 
