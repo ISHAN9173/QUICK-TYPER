@@ -2757,25 +2757,42 @@ window.showPage = function(pageId){
 
     originalShowPage.apply(this, arguments);
 
-    /* Give every page its own atmosphere via a body class. */
-    document.body.className = document.body.className
-        .split(" ")
-        .filter(cls => !cls.startsWith("page-"))
-        .join(" ");
+    try{
 
-    document.body.classList.add("page-" + pageId);
+        /* Give every page its own atmosphere via a body class. */
+        document.body.className = document.body.className
+            .split(" ")
+            .filter(cls => !cls.startsWith("page-"))
+            .join(" ");
 
-    if(pageId === "achievements"){
-        checkBadges();
-    }
+        document.body.classList.add("page-" + pageId);
 
-    if(pageId === "map" && typeof initQuickTypeMap === "function"){
-        setTimeout(function(){
-            initQuickTypeMap();
-            if(window.quickTypeMap){
-                window.quickTypeMap.invalidateSize();
-            }
-        }, 150);
+        if(pageId === "achievements"){
+            checkBadges();
+        }
+
+        if(pageId === "map" && typeof initQuickTypeMap === "function"){
+            setTimeout(function(){
+                try{
+                    initQuickTypeMap();
+                    if(window.quickTypeMap){
+                        window.quickTypeMap.invalidateSize();
+                    }
+                }catch(err){
+                    console.error("QuickType map init failed:", err);
+                    const info = document.getElementById("mapInfo");
+                    if(info){
+                        info.innerHTML =
+                            "<strong>Map unavailable</strong><br>" +
+                            "The map couldn't load — this can happen if your browser " +
+                            "(e.g. Brave Shields) is blocking the map's external script.";
+                    }
+                }
+            }, 150);
+        }
+
+    }catch(err){
+        console.error("QuickType navigation extras failed:", err);
     }
 
 };
@@ -3038,8 +3055,12 @@ function runPageCurtain(onCovered){
 
     if(!curtain){
         /* No curtain available — just swap immediately. */
-        if(typeof onCovered === "function"){
-            onCovered();
+        try{
+            if(typeof onCovered === "function"){
+                onCovered();
+            }
+        }catch(err){
+            console.error("QuickType page swap failed:", err);
         }
         return;
     }
@@ -3047,24 +3068,43 @@ function runPageCurtain(onCovered){
     const COVER_MS = 220;
     const HOLD_MS = 40;
 
+    const clearCurtain = function(){
+        curtain.classList.remove("cover");
+        clearTimeout(curtain._safetyTimer);
+    };
+
     /* Phase 1: fade the curtain to fully opaque, hiding the
        current page completely. */
     curtain.classList.add("cover");
+
+    /* Absolute safety net — if anything below goes wrong in a
+       way we didn't anticipate, this guarantees the curtain can
+       never stay stuck covering the screen for more than 1.5s. */
+    clearTimeout(curtain._safetyTimer);
+    curtain._safetyTimer = setTimeout(clearCurtain, 1500);
 
     setTimeout(() => {
 
         /* Phase 2: swap the page content while the screen is
            fully covered — the old page is never visible at the
-           same time as the new one. */
-        if(typeof onCovered === "function"){
-            onCovered();
-        }
+           same time as the new one. try/finally guarantees the
+           curtain always gets removed afterward, even if the
+           page swap itself throws an error. */
+        try{
+            if(typeof onCovered === "function"){
+                onCovered();
+            }
+        }catch(err){
+            console.error("QuickType page swap failed:", err);
+        }finally{
 
-        setTimeout(() => {
-            /* Phase 3: fade the curtain back out, revealing the
-               already-swapped new page underneath. */
-            curtain.classList.remove("cover");
-        }, HOLD_MS);
+            setTimeout(() => {
+                /* Phase 3: fade the curtain back out, revealing
+                   the already-swapped new page underneath. */
+                clearCurtain();
+            }, HOLD_MS);
+
+        }
 
     }, COVER_MS);
 
