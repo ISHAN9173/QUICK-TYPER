@@ -2422,18 +2422,32 @@ body.page-home{
 
 /* =========================================================
    SCROLL-REVEAL MOTION UTILITY
+
+   Pure CSS — plays automatically the moment an element renders.
+   Content is NEVER dependent on JavaScript running successfully;
+   JS (observeReveals) only adds a little extra polish for
+   elements the user scrolls to later, it is not required for
+   the page to be visible at all.
 ========================================================= */
 
 .reveal{
-    opacity:0;
-    transform:translateY(26px);
-    transition:opacity .6s cubic-bezier(.2,.7,.3,1), transform .6s cubic-bezier(.2,.7,.3,1);
+    animation:revealIn .7s cubic-bezier(.2,.7,.3,1) both;
 }
 
-.reveal.in-view{
-    opacity:1;
-    transform:none;
+@keyframes revealIn{
+    from{
+        opacity:0;
+        transform:translateY(26px);
+    }
+    to{
+        opacity:1;
+        transform:none;
+    }
 }
+
+.landing-features .feature-card:nth-child(1){ animation-delay:.05s; }
+.landing-features .feature-card:nth-child(2){ animation-delay:.15s; }
+.landing-features .feature-card:nth-child(3){ animation-delay:.25s; }
 
 
 /* =========================================================
