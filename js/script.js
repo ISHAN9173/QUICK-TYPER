@@ -455,8 +455,6 @@ function newTest(){
 
     errorCharacters = 0;
 
-    mainLastLength = 0;
-
     typingInput.disabled = false;
 
     typingInput.value = "";
@@ -512,8 +510,6 @@ function focusTyping(){
 }
 
 
-let mainLastLength = 0;
-
 typingInput.addEventListener(
     "input",
     ()=>{
@@ -525,23 +521,6 @@ typingInput.addEventListener(
         if(testFinished){
             return;
         }
-
-        const typed = typingInput.value;
-
-        if(typed.length > mainLastLength){
-
-            const lastChar = typed[typed.length - 1];
-
-            const expected =
-                currentParagraph[typed.length - 1];
-
-            if(expected !== undefined && lastChar !== expected){
-                playErrorSound();
-            }
-
-        }
-
-        mainLastLength = typed.length;
 
         updateTypingDisplay();
 
@@ -2862,8 +2841,6 @@ document
             localStorage.setItem("quickTypeLoggedIn", "true");
             localStorage.setItem("quickTypeUser", email);
 
-            checkLoginState();
-
             showToast("Logged in as " + email);
 
             setTimeout(function(){
@@ -2878,55 +2855,6 @@ document
         }
 
     });
-
-
-/* ---------------------------------------------------------
-   LOGIN STATE — reflect logged-in/out status in the nav bar
-   and let a logged-in user log back out from the same button.
---------------------------------------------------------- */
-
-function checkLoginState(){
-
-    const loggedIn =
-        localStorage.getItem("quickTypeLoggedIn") === "true";
-
-    const loginBtn =
-        document.getElementById("nav-login");
-
-    if(!loginBtn){
-        return;
-    }
-
-    if(loggedIn){
-
-        loginBtn.textContent = "Logout";
-
-        loginBtn.onclick = function(){
-
-            localStorage.removeItem("quickTypeLoggedIn");
-            localStorage.removeItem("quickTypeUser");
-
-            checkLoginState();
-
-            showToast("Logged out");
-
-            showPage("home");
-
-        };
-
-    }else{
-
-        loginBtn.textContent = "Login";
-
-        loginBtn.onclick = function(){
-            showPage("login");
-        };
-
-    }
-
-}
-
-checkLoginState();
 
 
 /* ============================================================
@@ -3501,20 +3429,38 @@ window.addEventListener("popstate", function(event){
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    const initialFromHash =
-        location.hash ? location.hash.slice(1) : "";
+    /* Each enhancement runs independently — if one throws (e.g.
+       localStorage blocked in a locked-down browser mode), it
+       must never stop the others, and it must never stop the
+       page from being visible (visibility no longer depends on
+       any of this running at all). */
 
-    const initialTarget =
-        initialFromHash && document.getElementById(initialFromHash);
-
-    if(initialTarget && initialTarget.classList.contains("page")){
-        showPage(initialFromHash, { skipHistory:true });
-    }else{
-        renderHomeStatsChart();
+    function safely(fn){
+        try{
+            fn();
+        }catch(err){
+            console.error("QuickType init step failed:", err);
+        }
     }
 
-    refreshAiCoachTip();
-    renderGoalProgress(loadGoal());
-    observeReveals();
+    safely(function(){
+
+        const initialFromHash =
+            location.hash ? location.hash.slice(1) : "";
+
+        const initialTarget =
+            initialFromHash && document.getElementById(initialFromHash);
+
+        if(initialTarget && initialTarget.classList.contains("page")){
+            showPage(initialFromHash, { skipHistory:true });
+        }else{
+            renderHomeStatsChart();
+        }
+
+    });
+
+    safely(refreshAiCoachTip);
+    safely(function(){ renderGoalProgress(loadGoal()); });
+    safely(observeReveals);
 
 });
