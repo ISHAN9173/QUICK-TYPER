@@ -455,6 +455,8 @@ function newTest(){
 
     errorCharacters = 0;
 
+    mainLastLength = 0;
+
     typingInput.disabled = false;
 
     typingInput.value = "";
@@ -510,6 +512,8 @@ function focusTyping(){
 }
 
 
+let mainLastLength = 0;
+
 typingInput.addEventListener(
     "input",
     ()=>{
@@ -521,6 +525,23 @@ typingInput.addEventListener(
         if(testFinished){
             return;
         }
+
+        const typed = typingInput.value;
+
+        if(typed.length > mainLastLength){
+
+            const lastChar = typed[typed.length - 1];
+
+            const expected =
+                currentParagraph[typed.length - 1];
+
+            if(expected !== undefined && lastChar !== expected){
+                playErrorSound();
+            }
+
+        }
+
+        mainLastLength = typed.length;
 
         updateTypingDisplay();
 
@@ -2757,42 +2778,25 @@ window.showPage = function(pageId){
 
     originalShowPage.apply(this, arguments);
 
-    try{
+    /* Give every page its own atmosphere via a body class. */
+    document.body.className = document.body.className
+        .split(" ")
+        .filter(cls => !cls.startsWith("page-"))
+        .join(" ");
 
-        /* Give every page its own atmosphere via a body class. */
-        document.body.className = document.body.className
-            .split(" ")
-            .filter(cls => !cls.startsWith("page-"))
-            .join(" ");
+    document.body.classList.add("page-" + pageId);
 
-        document.body.classList.add("page-" + pageId);
+    if(pageId === "achievements"){
+        checkBadges();
+    }
 
-        if(pageId === "achievements"){
-            checkBadges();
-        }
-
-        if(pageId === "map" && typeof initQuickTypeMap === "function"){
-            setTimeout(function(){
-                try{
-                    initQuickTypeMap();
-                    if(window.quickTypeMap){
-                        window.quickTypeMap.invalidateSize();
-                    }
-                }catch(err){
-                    console.error("QuickType map init failed:", err);
-                    const info = document.getElementById("mapInfo");
-                    if(info){
-                        info.innerHTML =
-                            "<strong>Map unavailable</strong><br>" +
-                            "The map couldn't load — this can happen if your browser " +
-                            "(e.g. Brave Shields) is blocking the map's external script.";
-                    }
-                }
-            }, 150);
-        }
-
-    }catch(err){
-        console.error("QuickType navigation extras failed:", err);
+    if(pageId === "map" && typeof initQuickTypeMap === "function"){
+        setTimeout(function(){
+            initQuickTypeMap();
+            if(typeof quickTypeMap !== "undefined" && quickTypeMap){
+                quickTypeMap.invalidateSize();
+            }
+        }, 320);
     }
 
 };
@@ -2837,8 +2841,20 @@ function submitFeedback(event){
 
 
 /* ---------------------------------------------------------
-   LOGIN FORM
+   LOGIN FORM — with real validation and registered accounts
 --------------------------------------------------------- */
+
+function isValidEmail(value){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function getRegisteredUsers(){
+    return JSON.parse(localStorage.getItem("quickTypeUsers")) || {};
+}
+
+function saveRegisteredUsers(users){
+    localStorage.setItem("quickTypeUsers", JSON.stringify(users));
+}
 
 document
     .getElementById("loginForm")
@@ -2850,7 +2866,33 @@ document
         const password = document.getElementById("loginPassword").value;
         const message = document.getElementById("loginMessage");
 
-        if(email === "admin@gmail.com" && password === "12345"){
+        if(!email || !password){
+
+            message.className = "form-message error";
+            message.textContent = "✕ Please enter both email and password.";
+
+            return;
+
+        }
+
+        if(!isValidEmail(email)){
+
+            message.className = "form-message error";
+            message.textContent = "✕ Please enter a valid email address.";
+
+            return;
+
+        }
+
+        const users = getRegisteredUsers();
+
+        const isDemoAccount =
+            email === "admin@gmail.com" && password === "12345";
+
+        const isRegisteredAccount =
+            users[email] && users[email].password === password;
+
+        if(isDemoAccount || isRegisteredAccount){
 
             message.className = "form-message success";
             message.textContent = "✓ Welcome back! Login successful.";
@@ -2858,20 +2900,179 @@ document
             localStorage.setItem("quickTypeLoggedIn", "true");
             localStorage.setItem("quickTypeUser", email);
 
+            checkLoginState();
+
             showToast("Logged in as " + email);
 
             setTimeout(function(){
                 showPage("home");
             }, 800);
 
+        }else if(users[email] && users[email].password !== password){
+
+            message.className = "form-message error";
+            message.textContent = "✕ Incorrect password for this account.";
+
         }else{
 
             message.className = "form-message error";
-            message.textContent = "✕ Email or password is incorrect.";
+            message.textContent =
+                "✕ No account found for this email. Create one below.";
 
         }
 
     });
+
+
+/* ---------------------------------------------------------
+   CREATE ACCOUNT (SIGN UP)
+--------------------------------------------------------- */
+
+document
+    .getElementById("signupForm")
+    .addEventListener("submit", function(event){
+
+        event.preventDefault();
+
+        const name = document.getElementById("signupName").value.trim();
+        const email = document.getElementById("signupEmail").value.trim();
+        const password = document.getElementById("signupPassword").value;
+        const confirmPassword =
+            document.getElementById("signupConfirmPassword").value;
+        const message = document.getElementById("signupMessage");
+
+        if(!name || !email || !password || !confirmPassword){
+
+            message.className = "form-message error";
+            message.textContent = "✕ Please fill in every field.";
+
+            return;
+
+        }
+
+        if(!isValidEmail(email)){
+
+            message.className = "form-message error";
+            message.textContent = "✕ Please enter a valid email address.";
+
+            return;
+
+        }
+
+        if(password.length < 5){
+
+            message.className = "form-message error";
+            message.textContent =
+                "✕ Password must be at least 5 characters.";
+
+            return;
+
+        }
+
+        if(password !== confirmPassword){
+
+            message.className = "form-message error";
+            message.textContent = "✕ Passwords do not match.";
+
+            return;
+
+        }
+
+        const users = getRegisteredUsers();
+
+        if(email === "admin@gmail.com" || users[email]){
+
+            message.className = "form-message error";
+            message.textContent =
+                "✕ An account with this email already exists.";
+
+            return;
+
+        }
+
+        users[email] = { name, password };
+
+        saveRegisteredUsers(users);
+
+        message.className = "form-message success";
+        message.textContent = "✓ Account created! Logging you in...";
+
+        localStorage.setItem("quickTypeLoggedIn", "true");
+        localStorage.setItem("quickTypeUser", email);
+
+        checkLoginState();
+
+        showToast("Welcome, " + name + "!");
+
+        setTimeout(function(){
+            showPage("home");
+        }, 900);
+
+    });
+
+
+function showSignupForm(){
+
+    document.getElementById("loginFormWrap").style.display = "none";
+    document.getElementById("signupFormWrap").style.display = "block";
+
+}
+
+function showLoginForm(){
+
+    document.getElementById("signupFormWrap").style.display = "none";
+    document.getElementById("loginFormWrap").style.display = "block";
+
+}
+
+
+/* ---------------------------------------------------------
+   LOGIN STATE — reflect logged-in/out status in the nav bar
+   and let a logged-in user log back out from the same button.
+--------------------------------------------------------- */
+
+function checkLoginState(){
+
+    const loggedIn =
+        localStorage.getItem("quickTypeLoggedIn") === "true";
+
+    const loginBtn =
+        document.getElementById("nav-login");
+
+    if(!loginBtn){
+        return;
+    }
+
+    if(loggedIn){
+
+        loginBtn.textContent = "Logout";
+
+        loginBtn.onclick = function(){
+
+            localStorage.removeItem("quickTypeLoggedIn");
+            localStorage.removeItem("quickTypeUser");
+
+            checkLoginState();
+
+            showToast("Logged out");
+
+            showPage("home");
+
+        };
+
+    }else{
+
+        loginBtn.textContent = "Login";
+
+        loginBtn.onclick = function(){
+            showPage("login");
+        };
+
+    }
+
+}
+
+checkLoginState();
 
 
 /* ============================================================
@@ -3055,12 +3256,8 @@ function runPageCurtain(onCovered){
 
     if(!curtain){
         /* No curtain available — just swap immediately. */
-        try{
-            if(typeof onCovered === "function"){
-                onCovered();
-            }
-        }catch(err){
-            console.error("QuickType page swap failed:", err);
+        if(typeof onCovered === "function"){
+            onCovered();
         }
         return;
     }
@@ -3068,43 +3265,24 @@ function runPageCurtain(onCovered){
     const COVER_MS = 220;
     const HOLD_MS = 40;
 
-    const clearCurtain = function(){
-        curtain.classList.remove("cover");
-        clearTimeout(curtain._safetyTimer);
-    };
-
     /* Phase 1: fade the curtain to fully opaque, hiding the
        current page completely. */
     curtain.classList.add("cover");
-
-    /* Absolute safety net — if anything below goes wrong in a
-       way we didn't anticipate, this guarantees the curtain can
-       never stay stuck covering the screen for more than 1.5s. */
-    clearTimeout(curtain._safetyTimer);
-    curtain._safetyTimer = setTimeout(clearCurtain, 1500);
 
     setTimeout(() => {
 
         /* Phase 2: swap the page content while the screen is
            fully covered — the old page is never visible at the
-           same time as the new one. try/finally guarantees the
-           curtain always gets removed afterward, even if the
-           page swap itself throws an error. */
-        try{
-            if(typeof onCovered === "function"){
-                onCovered();
-            }
-        }catch(err){
-            console.error("QuickType page swap failed:", err);
-        }finally{
-
-            setTimeout(() => {
-                /* Phase 3: fade the curtain back out, revealing
-                   the already-swapped new page underneath. */
-                clearCurtain();
-            }, HOLD_MS);
-
+           same time as the new one. */
+        if(typeof onCovered === "function"){
+            onCovered();
         }
+
+        setTimeout(() => {
+            /* Phase 3: fade the curtain back out, revealing the
+               already-swapped new page underneath. */
+            curtain.classList.remove("cover");
+        }, HOLD_MS);
 
     }, COVER_MS);
 
@@ -3469,38 +3647,121 @@ window.addEventListener("popstate", function(event){
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    /* Each enhancement runs independently — if one throws (e.g.
-       localStorage blocked in a locked-down browser mode), it
-       must never stop the others, and it must never stop the
-       page from being visible (visibility no longer depends on
-       any of this running at all). */
+    const initialFromHash =
+        location.hash ? location.hash.slice(1) : "";
 
-    function safely(fn){
-        try{
-            fn();
-        }catch(err){
-            console.error("QuickType init step failed:", err);
-        }
+    const initialTarget =
+        initialFromHash && document.getElementById(initialFromHash);
+
+    if(initialTarget && initialTarget.classList.contains("page")){
+        showPage(initialFromHash, { skipHistory:true });
+    }else{
+        renderHomeStatsChart();
     }
 
-    safely(function(){
+    refreshAiCoachTip();
+    renderGoalProgress(loadGoal());
+    observeReveals();
+    initImageSlider();
 
-        const initialFromHash =
-            location.hash ? location.hash.slice(1) : "";
+});
 
-        const initialTarget =
-            initialFromHash && document.getElementById(initialFromHash);
 
-        if(initialTarget && initialTarget.classList.contains("page")){
-            showPage(initialFromHash, { skipHistory:true });
-        }else{
-            renderHomeStatsChart();
-        }
+/* ---------------------------------------------------------
+   IMAGE SLIDER — small snapshot gallery, changes on click
+--------------------------------------------------------- */
+
+const sliderImages = [
+    "https://picsum.photos/seed/quicktype1/600/400",
+    "https://picsum.photos/seed/quicktype2/600/400",
+    "https://picsum.photos/seed/quicktype3/600/400",
+    "https://picsum.photos/seed/quicktype4/600/400"
+];
+
+let sliderIndex = 0;
+
+function initImageSlider(){
+
+    const img = document.getElementById("sliderImage");
+    const dotsWrap = document.getElementById("sliderDots");
+    const totalEl = document.getElementById("sliderTotal");
+
+    if(!img || !dotsWrap){
+        return;
+    }
+
+    totalEl.textContent = sliderImages.length;
+
+    dotsWrap.innerHTML = "";
+
+    sliderImages.forEach((src, index) => {
+
+        const dot = document.createElement("button");
+
+        dot.className =
+            "slider-dot" + (index === 0 ? " active" : "");
+
+        dot.setAttribute("aria-label", "Go to image " + (index + 1));
+
+        dot.onclick = () => goToSliderImage(index);
+
+        dotsWrap.appendChild(dot);
 
     });
 
-    safely(refreshAiCoachTip);
-    safely(function(){ renderGoalProgress(loadGoal()); });
-    safely(observeReveals);
+    renderSliderImage();
 
-});
+}
+
+function renderSliderImage(){
+
+    const img = document.getElementById("sliderImage");
+    const currentEl = document.getElementById("sliderCurrent");
+
+    if(!img){
+        return;
+    }
+
+    img.style.opacity = "0";
+
+    setTimeout(() => {
+        img.src = sliderImages[sliderIndex];
+        img.style.opacity = "1";
+    }, 120);
+
+    if(currentEl){
+        currentEl.textContent = sliderIndex + 1;
+    }
+
+    document
+        .querySelectorAll(".slider-dot")
+        .forEach((dot, index) => {
+            dot.classList.toggle("active", index === sliderIndex);
+        });
+
+}
+
+function nextSliderImage(){
+
+    sliderIndex = (sliderIndex + 1) % sliderImages.length;
+
+    renderSliderImage();
+
+}
+
+function prevSliderImage(){
+
+    sliderIndex =
+        (sliderIndex - 1 + sliderImages.length) % sliderImages.length;
+
+    renderSliderImage();
+
+}
+
+function goToSliderImage(index){
+
+    sliderIndex = index;
+
+    renderSliderImage();
+
+}
