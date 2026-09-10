@@ -1,4 +1,4 @@
-/* QuickType — Advanced Typing Trainer
+p/* QuickType — Advanced Typing Trainer
    All application JavaScript, extracted from index.html. */
 
 /* =========================================================
