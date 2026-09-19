@@ -40,6 +40,7 @@
 
 html{
     scroll-behavior:smooth;
+    overflow-x:hidden;
 }
 
 body{
@@ -129,6 +130,7 @@ header{
     justify-content:space-between;
 
     padding:0 5%;
+    gap:16px;
 
     background:rgba(7,11,23,.82);
 
@@ -138,6 +140,8 @@ header{
 }
 
 .logo{
+    flex-shrink:0;
+    white-space:nowrap;
     font-size:25px;
     font-weight:950;
     letter-spacing:-1px;
@@ -161,7 +165,9 @@ header{
 
 .nav{
     display:flex;
-    gap:5px;
+    gap:4px;
+    flex-wrap:nowrap;
+    min-width:0;
 }
 
 .nav button{
@@ -170,11 +176,12 @@ header{
 
     color:var(--muted);
 
-    padding:10px 14px;
+    padding:10px 12px;
 
     border-radius:10px;
 
     font-weight:700;
+    white-space:nowrap;
 
     transition:.2s;
 }
@@ -204,6 +211,7 @@ header{
 .header-extras{
     display:flex;
     align-items:center;
+    flex-shrink:0;
     gap:16px;
 }
 
@@ -254,10 +262,60 @@ header{
     box-shadow:0 0 0 3px rgba(255,255,255,.15);
 }
 
-@media (max-width:900px){
+/* The full menu needs ~1300px. Below that, drop the extras first,
+   then collapse the menu into the hamburger so nothing (least of all
+   the Login button) is ever pushed off-screen. */
+@media (max-width:1400px){
     .header-extras{
         display:none;
     }
+}
+
+@media (max-width:1280px){
+
+    .mobile-menu{
+        display:block;
+        margin-left:auto;
+        padding:6px 10px;
+        cursor:pointer;
+    }
+
+    .nav{
+        display:none;
+    }
+
+    .nav.open{
+        display:flex;
+        flex-direction:column;
+        gap:4px;
+
+        position:absolute;
+        top:100%;
+        left:0;
+        right:0;
+
+        padding:12px 5% 18px;
+
+        max-height:calc(100vh - 74px);
+        overflow-y:auto;
+
+        background:rgba(7,11,23,.98);
+        border-bottom:1px solid var(--border);
+        box-shadow:0 24px 50px rgba(0,0,0,.45);
+    }
+
+    .nav.open button{
+        width:100%;
+        text-align:left;
+        padding:13px 14px;
+    }
+
+    .nav.open #nav-login{
+        margin-left:0 !important;
+        margin-top:6px;
+        text-align:center;
+    }
+
 }
 
 
@@ -1864,12 +1922,8 @@ footer{
         height:62px;
     }
 
-    .nav{
-        display:none;
-    }
-
-    .mobile-menu{
-        display:block;
+    .nav.open{
+        max-height:calc(100vh - 62px);
     }
 
     .page{
@@ -2035,9 +2089,9 @@ footer{
 .image-slider{
     position:relative;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    width:100%;
+    aspect-ratio:16 / 9;
+    max-height:440px;
 
     border-radius:16px;
     overflow:hidden;
@@ -2045,23 +2099,54 @@ footer{
     background:rgba(255,255,255,.04);
 }
 
+.image-slider:focus-visible{
+    outline:2px solid var(--primary);
+    outline-offset:3px;
+}
+
 .slider-img{
+    position:absolute;
+    inset:0;
+
     width:100%;
-    max-height:360px;
+    height:100%;
 
     object-fit:cover;
     display:block;
 
-    animation:sliderFade .35s ease;
+    opacity:1;
+    transition:opacity .35s ease;
 }
 
-@keyframes sliderFade{
-    from{ opacity:0; transform:scale(1.02); }
-    to{ opacity:1; transform:scale(1); }
+.image-slider.is-loading .slider-img{
+    opacity:0;
+}
+
+.image-slider.is-loading::after{
+    content:"";
+
+    position:absolute;
+    top:50%;
+    left:50%;
+
+    width:34px;
+    height:34px;
+    margin:-17px 0 0 -17px;
+
+    border-radius:50%;
+    border:3px solid rgba(255,255,255,.25);
+    border-top-color:#fff;
+
+    animation:sliderSpin .8s linear infinite;
+}
+
+@keyframes sliderSpin{
+    to{ transform:rotate(360deg); }
 }
 
 .slider-arrow{
     position:absolute;
+    z-index:2;
     top:50%;
     transform:translateY(-50%);
 
@@ -2095,6 +2180,47 @@ footer{
 
 .slider-arrow-right{
     right:14px;
+}
+
+.slider-dots{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:12px;
+    z-index:2;
+
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:8px;
+
+    padding:0 60px;
+}
+
+.slider-dot{
+    position:relative;
+
+    width:9px;
+    height:9px;
+    padding:0;
+
+    border:0;
+    border-radius:50%;
+
+    background:rgba(255,255,255,.5);
+
+    transition:background .2s, transform .2s;
+}
+
+.slider-dot::after{
+    content:"";
+    position:absolute;
+    inset:-8px;
+}
+
+.slider-dot.active{
+    background:#fff;
+    transform:scale(1.35);
 }
 
 .slider-meta{
@@ -2178,19 +2304,39 @@ footer{
 }
 
 .login-container{
-    min-height:60vh;
+    min-height:calc(100vh - 260px);
 
     display:flex;
     align-items:center;
     justify-content:center;
 
-    padding:20px;
+    padding:12px 0;
 }
 
 .login-card{
     width:100%;
-    max-width:420px;
+    max-width:440px;
+    min-width:0;
     text-align:center;
+}
+
+.login-card .form-card{
+    width:100%;
+    max-width:100%;
+    padding:28px 26px;
+    text-align:left;
+}
+
+@media (max-width:480px){
+
+    .login-card .form-card{
+        padding:22px 16px;
+    }
+
+    .login-logo{
+        font-size:28px;
+    }
+
 }
 
 .login-logo{
@@ -2646,31 +2792,6 @@ body.page-home{
         radial-gradient(circle at 90% 20%, rgba(6,182,212,.12), transparent 25%),
         radial-gradient(circle at 50% 100%, rgba(236,72,153,.08), transparent 30%),
         var(--bg);
-}
-
-
-/* =========================================================
-   PAGE TRANSITION CURTAIN (adds real "new page" motion to
-   nav — used for every showPage() call, login/feedback incl.)
-========================================================= */
-
-#pageCurtain{
-    position:fixed;
-    inset:0;
-    z-index:4000;
-    pointer-events:none;
-
-    background:linear-gradient(135deg,#6366f1,#8b5cf6 55%,#ec4899);
-    opacity:0;
-    transition:opacity .22s ease;
-}
-
-#pageCurtain.cover{
-    opacity:1;
-}
-
-.page{
-    transition:opacity .2s ease;
 }
 
 
@@ -3318,4 +3439,22 @@ body.page-home{
     .landing-ai{ grid-template-columns:1fr; text-align:center; }
     .landing-ai-icon{ margin:0 auto; }
     .goal-head{ flex-direction:column; align-items:flex-start; }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion:reduce){
+
+    *,
+    *::before,
+    *::after{
+        animation-duration:.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.01ms !important;
+        scroll-behavior:auto !important;
+    }
+
 }
