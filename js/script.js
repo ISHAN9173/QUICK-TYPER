@@ -1,6 +1,34 @@
 /* QuickType — Advanced Typing Trainer
    All application JavaScript, extracted from index.html. */
 
+(function(){
+
+    try{
+        const probe = "__quicktype_probe__";
+        window.localStorage.setItem(probe, "1");
+        window.localStorage.removeItem(probe);
+    }catch(err){
+
+        const memory = {};
+
+        const shim = {
+            getItem:function(key){ return Object.prototype.hasOwnProperty.call(memory, key) ? memory[key] : null; },
+            setItem:function(key, value){ memory[key] = String(value); },
+            removeItem:function(key){ delete memory[key]; },
+            clear:function(){ Object.keys(memory).forEach(function(k){ delete memory[k]; }); }
+        };
+
+        try{
+            Object.defineProperty(window, "localStorage", { value:shim, configurable:true });
+        }catch(e){
+            console.warn("QuickType: localStorage unavailable, progress will not be saved.");
+        }
+
+    }
+
+})();
+
+
 /* =========================================================
    TEST PARAGRAPHS
 ========================================================= */
@@ -282,98 +310,91 @@ function showPage(pageId, navOptions){
 
     navOptions = navOptions || {};
 
-    const currentPage =
-        document.querySelector(".page.active");
+    const page = document.getElementById(pageId);
 
-    const isRealNavigation =
-        !currentPage || currentPage.id !== pageId;
+    /* Never blank the screen for an unknown page id. */
+    if(!page || !page.classList.contains("page")){
+        return;
+    }
 
-    const doSwap = function(){
+    if(typeof stopReadAloud === "function"){
+        stopReadAloud();
+    }
 
-        if(typeof stopReadAloud === "function"){
-            stopReadAloud();
-        }
+    if(typeof closeMobileMenu === "function"){
+        closeMobileMenu();
+    }
 
-        document
-            .querySelectorAll(".page")
-            .forEach(page =>
-                page.classList.remove("active")
-            );
+    document
+        .querySelectorAll(".page.active")
+        .forEach(p => p.classList.remove("active"));
 
-        const page =
-            document.getElementById(pageId);
+    page.classList.add("active");
 
-        if(page){
-            page.classList.add("active");
-        }
+    document
+        .querySelectorAll(".nav button.active")
+        .forEach(button => button.classList.remove("active"));
 
-        document
-            .querySelectorAll(".nav button")
-            .forEach(button =>
-                button.classList.remove("active")
-            );
+    const nav = document.getElementById("nav-" + pageId);
 
-        const nav =
-            document.getElementById(
-                "nav-" + pageId
-            );
+    if(nav){
+        nav.classList.add("active");
+    }
 
-        if(nav){
-            nav.classList.add("active");
-        }
+    window.scrollTo({ top:0, behavior:"auto" });
 
-        window.scrollTo({
-            top:0,
-            behavior:"auto"
-        });
-
-        /* Treat navigation like real pages: update the URL hash so
-           Login / Feedback / any section is bookmarkable and works
-           with the browser back button. */
-        if(!navOptions.skipHistory && page){
-            const hash = "#" + pageId;
-            if(location.hash !== hash){
+    /* Keep the URL hash in sync so every section is bookmarkable
+       and the browser back button works. */
+    if(!navOptions.skipHistory){
+        const hash = "#" + pageId;
+        if(location.hash !== hash){
+            try{
                 history.pushState({ page:pageId }, "", hash);
+            }catch(err){
+                /* Sandboxed / embedded previews can block the History API. */
             }
         }
+    }
 
-        if(pageId === "progress"){
-            renderProgress();
-        }
+    if(pageId === "progress"){
+        renderProgress();
+    }
 
-        if(pageId === "practice"){
-            renderProblemKeys();
-        }
+    if(pageId === "practice"){
+        renderProblemKeys();
+    }
 
-        if(pageId === "home" && typeof renderHomeStatsChart === "function"){
+    if(pageId === "home"){
+
+        if(typeof renderHomeStatsChart === "function"){
             renderHomeStatsChart();
         }
 
-        if(pageId === "home" && typeof renderGoalProgress === "function"){
+        if(typeof renderGoalProgress === "function"){
             renderGoalProgress(typeof loadGoal === "function" ? loadGoal() : 40);
         }
 
-        if(pageId === "home" && typeof renderTypingSlider === "function"){
+        if(typeof renderTypingSlider === "function"){
             renderTypingSlider();
         }
 
-        if(pageId === "map" && typeof attemptMapInit === "function"){
-            attemptMapInit();
+    }
+
+    /* The slider only runs while the Home page is visible. */
+    if(pageId === "home"){
+        if(typeof startSliderAutoplay === "function"){
+            startSliderAutoplay();
         }
+    }else if(typeof stopSliderAutoplay === "function"){
+        stopSliderAutoplay();
+    }
 
-        if(typeof observeReveals === "function"){
-            observeReveals();
-        }
+    if(pageId === "map" && typeof attemptMapInit === "function"){
+        attemptMapInit();
+    }
 
-    };
-
-    /* Fully cover the screen first, swap the page while hidden,
-       THEN reveal — so the previous page is never visible at the
-       same time as the next one (a real cut, not a crossfade). */
-    if(isRealNavigation && typeof runPageCurtain === "function"){
-        runPageCurtain(doSwap);
-    }else{
-        doSwap();
+    if(typeof observeReveals === "function"){
+        observeReveals();
     }
 
 }
@@ -383,35 +404,31 @@ function showPage(pageId, navOptions){
    MOBILE MENU
 ========================================================= */
 
-function toggleMobileMenu(){
+function toggleMobileMenu(force){
 
-    const nav =
-        document.querySelector(".nav");
+    const nav = document.getElementById("mainNav");
+    const button = document.getElementById("mobileMenuBtn");
 
-    if(nav.style.display === "flex"){
-
-        nav.style.display = "";
-
-    }else{
-
-        nav.style.display = "flex";
-
-        nav.style.position = "absolute";
-
-        nav.style.top = "62px";
-
-        nav.style.left = "0";
-
-        nav.style.right = "0";
-
-        nav.style.padding = "10px";
-
-        nav.style.background = "#070b17";
-
-        nav.style.flexDirection = "column";
-
+    if(!nav){
+        return;
     }
 
+    const open =
+        typeof force === "boolean"
+            ? force
+            : !nav.classList.contains("open");
+
+    nav.classList.toggle("open", open);
+
+    if(button){
+        button.setAttribute("aria-expanded", String(open));
+        button.textContent = open ? "✕" : "☰";
+    }
+
+}
+
+function closeMobileMenu(){
+    toggleMobileMenu(false);
 }
 
 
@@ -2207,7 +2224,8 @@ renderProgress();
 
 newTest();
 
-showPage("home");
+/* The first page is shown from the DOMContentLoaded handler at the
+   bottom of this file, once every later const/let has been created. */
 
 
 /* =========================================================
@@ -2779,8 +2797,8 @@ window.showPage = function(pageId){
             checkBadges();
         }
 
-        if(pageId === "map" && typeof attemptMapInit === "function"){
-            setTimeout(attemptMapInit, 150);
+        if(pageId === "map"){
+            setTimeout(refreshMapSize, 250);
         }
 
     }catch(err){
@@ -3085,71 +3103,233 @@ document
 
 /* ---------------------------------------------------------
    INTERACTIVE MAP
+
+   Leaflet is loaded on demand — the first time the Map page is
+   opened — so it costs nothing on every other page. If one CDN
+   is blocked (ad-blocker, Brave Shields, offline) the next one
+   is tried automatically, and if the default tiles are blocked
+   a backup tile provider takes over.
 --------------------------------------------------------- */
 
 let quickTypeMap = null;
 let indiaMarker = null;
 let ahmedabadMarker = null;
 let userMarker = null;
+let mapTileLayer = null;
+let mapTileProvider = 0;
+let leafletPromise = null;
 
 const INDIA = [22.9734, 78.6569];
 const AHMEDABAD = [23.0225, 72.5714];
 
-function attemptMapInit(){
-
-    try{
-
-        if(typeof L === "undefined"){
-            throw new Error("Leaflet library did not load");
-        }
-
-        initQuickTypeMap();
-
-        if(quickTypeMap){
-            quickTypeMap.invalidateSize();
-        }
-
-    }catch(err){
-        console.error("QuickType map init failed:", err);
-        showMapFallback();
+const LEAFLET_SOURCES = [
+    {
+        js:"https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+        css:"https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
+        images:"https://unpkg.com/leaflet@1.9.4/dist/images/"
+    },
+    {
+        js:"https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js",
+        css:"https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css",
+        images:"https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/"
+    },
+    {
+        js:"https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js",
+        css:"https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css",
+        images:"https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/"
     }
+];
+
+const MAP_TILE_PROVIDERS = [
+    {
+        url:"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        options:{
+            maxZoom:19,
+            attribution:"&copy; OpenStreetMap contributors"
+        }
+    },
+    {
+        /* Backup — also works when the page is opened straight from
+           disk (file://), which OpenStreetMap's servers reject. */
+        url:"https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+        options:{
+            maxZoom:19,
+            subdomains:"abcd",
+            attribution:"&copy; OpenStreetMap contributors &copy; CARTO"
+        }
+    }
+];
+
+function loadLeaflet(){
+
+    if(window.L && typeof L.map === "function"){
+        return Promise.resolve();
+    }
+
+    if(leafletPromise){
+        return leafletPromise;
+    }
+
+    leafletPromise = new Promise(function(resolve, reject){
+
+        let attempt = 0;
+
+        function tryNextSource(){
+
+            if(attempt >= LEAFLET_SOURCES.length){
+                leafletPromise = null;   /* let "Retry" try again */
+                reject(new Error("Leaflet could not be downloaded from any CDN."));
+                return;
+            }
+
+            const source = LEAFLET_SOURCES[attempt++];
+
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = source.css;
+            document.head.appendChild(link);
+
+            const script = document.createElement("script");
+            script.src = source.js;
+            script.async = true;
+
+            script.onload = function(){
+
+                if(window.L && typeof L.map === "function"){
+                    /* Set the marker-icon folder explicitly instead of letting
+                       Leaflet guess it from CSS that may not have loaded yet. */
+                    L.Icon.Default.imagePath = source.images;
+                    resolve();
+                    return;
+                }
+
+                script.remove();
+                link.remove();
+                tryNextSource();
+
+            };
+
+            script.onerror = function(){
+                script.remove();
+                link.remove();
+                tryNextSource();
+            };
+
+            document.head.appendChild(script);
+
+        }
+
+        tryNextSource();
+
+    });
+
+    return leafletPromise;
 
 }
 
-function showMapFallback(){
+function showMapStatus(icon, title, text, showRetry){
 
     const container = document.getElementById("quickTypeMap");
 
-    if(container){
-        container.innerHTML =
-            '<div class="map-fallback">' +
-                '<div class="map-fallback-icon">🗺️</div>' +
-                '<h3>Map couldn\u2019t load</h3>' +
-                '<p>Your browser blocked the map\u2019s external script — common with ' +
-                'Brave Shields, ad blockers, or being offline.</p>' +
-                '<p class="map-fallback-hint">' +
-                    'In Brave: tap the Shields icon (🦁) in the address bar → ' +
-                    'turn Shields off for this site → reload.' +
-                '</p>' +
-                '<button class="btn btn-primary" onclick="attemptMapInit()">' +
-                    '↻ Retry' +
-                '</button>' +
-            '</div>';
+    if(!container){
+        return;
     }
 
-    const info = document.getElementById("mapInfo");
+    container.innerHTML =
+        '<div class="map-fallback">' +
+            '<div class="map-fallback-icon">' + icon + '</div>' +
+            '<h3>' + title + '</h3>' +
+            '<p>' + text + '</p>' +
+            (showRetry
+                ? '<button type="button" class="btn btn-primary" onclick="attemptMapInit()">↻ Retry</button>'
+                : '') +
+        '</div>';
 
-    if(info){
-        info.innerHTML =
-            "<strong>Map unavailable</strong><br>" +
-            "Adjust your browser's shield/ad-block settings for this site, then tap Retry.";
+}
+
+function showMapFallback(err){
+
+    const libraryMissing = !(window.L && typeof L.map === "function");
+
+    if(libraryMissing){
+
+        showMapStatus(
+            "🗺️",
+            "Map couldn\u2019t load",
+            "The map library couldn\u2019t be downloaded. Check your internet " +
+            "connection, or allow this site in your ad-blocker / browser " +
+            "shield, then tap Retry.",
+            true
+        );
+
+    }else{
+
+        showMapStatus(
+            "🗺️",
+            "Map couldn\u2019t start",
+            "Something went wrong while starting the map" +
+            (err && err.message ? " (" + err.message + ")" : "") +
+            ". Tap Retry.",
+            true
+        );
+
     }
+
+    showMapInfo(
+        "Map unavailable",
+        "Fix the issue above, then tap Retry."
+    );
+
+}
+
+function addMapTileLayer(){
+
+    const provider = MAP_TILE_PROVIDERS[mapTileProvider];
+
+    if(mapTileLayer){
+        quickTypeMap.removeLayer(mapTileLayer);
+    }
+
+    let loaded = 0;
+    let failed = 0;
+
+    const layer = L.tileLayer(provider.url, provider.options);
+
+    layer.on("tileload", function(){
+        loaded++;
+    });
+
+    layer.on("tileerror", function(){
+
+        failed++;
+
+        /* Nothing has loaded and several tiles failed: this provider is
+           blocked, so switch to the backup exactly once. */
+        if(
+            layer === mapTileLayer &&
+            loaded === 0 &&
+            failed >= 3 &&
+            mapTileProvider < MAP_TILE_PROVIDERS.length - 1
+        ){
+            mapTileProvider++;
+            addMapTileLayer();
+            showMapInfo(
+                "Using backup map tiles",
+                "The default tiles were blocked, so a backup provider is being used."
+            );
+        }
+
+    });
+
+    layer.addTo(quickTypeMap);
+
+    mapTileLayer = layer;
 
 }
 
 function initQuickTypeMap(){
 
-    if(quickTypeMap !== null){
+    if(quickTypeMap){
         return;
     }
 
@@ -3159,18 +3339,15 @@ function initQuickTypeMap(){
         return;
     }
 
-    quickTypeMap = L.map("quickTypeMap", {
-        zoomControl: true,
-        scrollWheelZoom: true
+    /* Remove the "loading" / error message before Leaflet takes over. */
+    mapElement.innerHTML = "";
+
+    quickTypeMap = L.map(mapElement, {
+        zoomControl:true,
+        scrollWheelZoom:true
     }).setView(INDIA, 5);
 
-    L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-            maxZoom: 19,
-            attribution: "&copy; OpenStreetMap contributors"
-        }
-    ).addTo(quickTypeMap);
+    addMapTileLayer();
 
     indiaMarker = L.marker(INDIA)
         .addTo(quickTypeMap)
@@ -3180,6 +3357,49 @@ function initQuickTypeMap(){
         .addTo(quickTypeMap)
         .bindPopup("<b>Ahmedabad</b><br>Gujarat, India");
 
+}
+
+/* Runs `action` once the map exists (loading Leaflet first if needed). */
+function withMap(action){
+
+    if(!quickTypeMap){
+        showMapStatus("⏳", "Loading map…", "Fetching the map library.", false);
+    }
+
+    return loadLeaflet()
+        .then(function(){
+
+            initQuickTypeMap();
+
+            if(quickTypeMap){
+                quickTypeMap.invalidateSize();
+
+                if(typeof action === "function"){
+                    try{
+                        action();
+                    }catch(actionErr){
+                        /* A failed button action must never wipe the map. */
+                        console.error("QuickType map action failed:", actionErr);
+                    }
+                }
+            }
+
+        })
+        .catch(function(err){
+            console.error("QuickType map failed:", err);
+            showMapFallback(err);
+        });
+
+}
+
+function attemptMapInit(){
+    return withMap();
+}
+
+function refreshMapSize(){
+    if(quickTypeMap){
+        quickTypeMap.invalidateSize();
+    }
 }
 
 function showMapInfo(title, text){
@@ -3194,192 +3414,116 @@ function showMapInfo(title, text){
 
 function goToIndia(){
 
-    attemptMapInit();
-
-    if(!quickTypeMap){
-        return;
-    }
-
-    quickTypeMap.setView(INDIA, 5);
-    indiaMarker.openPopup();
-
-    showMapInfo("Selected: India", "Showing the full country view.");
+    withMap(function(){
+        quickTypeMap.setView(INDIA, 5);
+        indiaMarker.openPopup();
+        showMapInfo("Selected: India", "Showing the full country view.");
+    });
 
 }
 
 function goToAhmedabad(){
 
-    attemptMapInit();
-
-    if(!quickTypeMap){
-        return;
-    }
-
-    quickTypeMap.setView(AHMEDABAD, 12);
-    ahmedabadMarker.openPopup();
-
-    showMapInfo("Selected: Ahmedabad", "Gujarat, India.");
+    withMap(function(){
+        quickTypeMap.setView(AHMEDABAD, 12);
+        ahmedabadMarker.openPopup();
+        showMapInfo("Selected: Ahmedabad", "Gujarat, India.");
+    });
 
 }
 
 function findMyLocation(){
 
-    attemptMapInit();
+    withMap(function(){
 
-    if(!quickTypeMap){
-        return;
-    }
-
-    if(!navigator.geolocation){
-
-        showMapInfo(
-            "Location unavailable",
-            "Your browser does not support geolocation."
-        );
-
-        return;
-
-    }
-
-    showMapInfo(
-        "Finding location...",
-        "Please allow location access in your browser."
-    );
-
-    navigator.geolocation.getCurrentPosition(
-        function(position){
-
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-
-            if(userMarker){
-                userMarker.setLatLng([lat, lng]);
-            }else{
-                userMarker = L.marker([lat, lng]).addTo(quickTypeMap);
-            }
-
-            userMarker.bindPopup("<b>Your Location</b>").openPopup();
-
-            quickTypeMap.setView([lat, lng], 14);
+        if(!navigator.geolocation){
 
             showMapInfo(
-                "Selected: My Location",
-                "Latitude: " + lat.toFixed(5) +
-                "<br>Longitude: " + lng.toFixed(5)
+                "Location unavailable",
+                "Your browser does not support geolocation."
             );
 
-        },
+            return;
 
-        function(error){
+        }
 
-            let message = "Unable to access your location.";
+        showMapInfo(
+            "Finding location...",
+            "Please allow location access in your browser."
+        );
 
-            if(error.code === 1){
-                message = "Location permission was denied.";
+        navigator.geolocation.getCurrentPosition(
+
+            function(position){
+
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                if(userMarker){
+                    userMarker.setLatLng([lat, lng]);
+                }else{
+                    userMarker = L.marker([lat, lng]).addTo(quickTypeMap);
+                }
+
+                userMarker.bindPopup("<b>Your Location</b>").openPopup();
+
+                quickTypeMap.setView([lat, lng], 14);
+
+                showMapInfo(
+                    "Selected: My Location",
+                    "Latitude: " + lat.toFixed(5) +
+                    "<br>Longitude: " + lng.toFixed(5)
+                );
+
+            },
+
+            function(error){
+
+                let message = "Unable to access your location.";
+
+                if(error.code === 1){
+                    message =
+                        "Location permission was denied. Location only works on " +
+                        "https:// or localhost — not when the file is opened directly.";
+                }else if(error.code === 3){
+                    message = "Finding your location timed out. Try again.";
+                }
+
+                showMapInfo("Location unavailable", message);
+
+            },
+
+            {
+                /* Coarse location is fast and works on laptops without GPS;
+                   high accuracy often just times out there. */
+                enableHighAccuracy:false,
+                timeout:15000,
+                maximumAge:60000
             }
 
-            showMapInfo("Location unavailable", message);
+        );
 
-        },
-
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        }
-    );
+    });
 
 }
 
 function resetMap(){
 
-    attemptMapInit();
+    withMap(function(){
 
-    if(!quickTypeMap){
-        return;
-    }
+        quickTypeMap.setView(INDIA, 5);
 
-    quickTypeMap.setView(INDIA, 5);
-
-    if(userMarker){
-        quickTypeMap.removeLayer(userMarker);
-        userMarker = null;
-    }
-
-    indiaMarker.closePopup();
-    ahmedabadMarker.closePopup();
-
-    showMapInfo("Selected: India", "Map has been reset.");
-
-}
-
-
-/* ============================================================
-   NEXT SECTION
-============================================================ */
-
-/* ---------------------------------------------------------
-   PAGE CURTAIN TRANSITION
---------------------------------------------------------- */
-
-function runPageCurtain(onCovered){
-
-    const curtain = document.getElementById("pageCurtain");
-
-    if(!curtain){
-        /* No curtain available — just swap immediately. */
-        try{
-            if(typeof onCovered === "function"){
-                onCovered();
-            }
-        }catch(err){
-            console.error("QuickType page swap failed:", err);
-        }
-        return;
-    }
-
-    const COVER_MS = 220;
-    const HOLD_MS = 40;
-
-    const clearCurtain = function(){
-        curtain.classList.remove("cover");
-        clearTimeout(curtain._safetyTimer);
-    };
-
-    /* Phase 1: fade the curtain to fully opaque, hiding the
-       current page completely. */
-    curtain.classList.add("cover");
-
-    /* Absolute safety net — if anything below goes wrong in a
-       way we didn't anticipate, this guarantees the curtain can
-       never stay stuck covering the screen for more than 1.5s. */
-    clearTimeout(curtain._safetyTimer);
-    curtain._safetyTimer = setTimeout(clearCurtain, 1500);
-
-    setTimeout(() => {
-
-        /* Phase 2: swap the page content while the screen is
-           fully covered — the old page is never visible at the
-           same time as the new one. try/finally guarantees the
-           curtain always gets removed afterward, even if the
-           page swap itself throws an error. */
-        try{
-            if(typeof onCovered === "function"){
-                onCovered();
-            }
-        }catch(err){
-            console.error("QuickType page swap failed:", err);
-        }finally{
-
-            setTimeout(() => {
-                /* Phase 3: fade the curtain back out, revealing
-                   the already-swapped new page underneath. */
-                clearCurtain();
-            }, HOLD_MS);
-
+        if(userMarker){
+            quickTypeMap.removeLayer(userMarker);
+            userMarker = null;
         }
 
-    }, COVER_MS);
+        indiaMarker.closePopup();
+        ahmedabadMarker.closePopup();
+
+        showMapInfo("Selected: India", "Map has been reset.");
+
+    });
 
 }
 
@@ -3634,60 +3778,349 @@ function refreshAiCoachTip(){
 
 /* ---------------------------------------------------------
    TYPING IN MOTION IMAGE SLIDER
+
+   - 12 slides, only the current + next image are ever fetched
+   - autoplay pauses on hover / focus / touch, when the tab is
+     hidden, when scrolled out of view and off the Home page
+   - arrows, dots, keyboard (← →) and swipe all work
+   - any photo that fails to load is replaced by generated art,
+     so the slider never shows a broken image
 --------------------------------------------------------- */
 
+function unsplashPhoto(id){
+    return "https://images.unsplash.com/photo-" + id +
+           "?auto=format&fit=crop&w=1200&q=75";
+}
+
 const typingSliderImages = [
-    {
-        src:"https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=900&q=80",
-        caption:"Focused typing session"
-    },
-    {
-        src:"https://images.unsplash.com/photo-1587440871875-191322ee64b0?auto=format&fit=crop&w=900&q=80",
-        caption:"Mechanical keyboard close-up"
-    },
-    {
-        src:"https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?auto=format&fit=crop&w=900&q=80",
-        caption:"Working at a laptop"
-    },
-    {
-        src:"https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80",
-        caption:"Remote workspace setup"
-    },
-    {
-        src:"https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80",
-        caption:"Coding on a keyboard"
-    }
+    { src:unsplashPhoto("1587829741301-dc798b83add3"), caption:"Focused typing session" },
+    { src:unsplashPhoto("1587440871875-191322ee64b0"), caption:"Mechanical keyboard close-up" },
+    { src:unsplashPhoto("1517430816045-df4b7de11d1d"), caption:"Working at a laptop" },
+    { src:unsplashPhoto("1519389950473-47ba0277781c"), caption:"Remote workspace setup" },
+    { src:unsplashPhoto("1498050108023-c5249f4df085"), caption:"Coding on a keyboard" },
+    { src:unsplashPhoto("1461749280684-dccba630e2f6"), caption:"Code on a dark monitor" },
+    { src:unsplashPhoto("1555066931-4365d14bab8c"),    caption:"Late-night coding session" },
+    { src:unsplashPhoto("1531297484001-80022131f5a1"), caption:"Laptop and desk setup" },
+    { src:unsplashPhoto("1496181133206-80ce9b88a853"), caption:"Laptop workspace" },
+    { src:unsplashPhoto("1484417894907-623942c8ee29"), caption:"A clean desk to type at" },
+    { src:unsplashPhoto("1515879218367-8466d910aaa4"), caption:"Code on a laptop screen" },
+    { src:unsplashPhoto("1522071820081-009f0129c71c"), caption:"Team working together" }
 ];
 
+const SLIDER_DELAY_MS = 5000;
+
 let typingSliderIndex = 0;
+let sliderTimer = null;
+let sliderPaused = false;
+let sliderInView = true;
+let sliderReady = false;
+
+const sliderFailed = new Set();
+const sliderPreloaded = new Set();
+
+
+function sliderFallbackArt(index, caption){
+
+    const hue = (index * 47 + 230) % 360;
+
+    let keys = "";
+
+    for(let row = 0; row < 4; row++){
+        for(let col = 0; col < 12; col++){
+            keys +=
+                '<rect x="' + (110 + col * 80 + row * 14) +
+                '" y="' + (300 + row * 72) +
+                '" width="66" height="58" rx="10" fill="rgba(255,255,255,' +
+                (((row + col) % 3 === 0) ? ".28" : ".14") + ')"/>';
+        }
+    }
+
+    const safeCaption =
+        String(caption)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+    const svg =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675">' +
+        '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+        '<stop offset="0" stop-color="hsl(' + hue + ',70%,38%)"/>' +
+        '<stop offset="1" stop-color="hsl(' + ((hue + 50) % 360) + ',75%,22%)"/>' +
+        '</linearGradient></defs>' +
+        '<rect width="1200" height="675" fill="url(#g)"/>' +
+        keys +
+        '<text x="600" y="190" text-anchor="middle" ' +
+        'font-family="Arial,Helvetica,sans-serif" font-size="54" ' +
+        'font-weight="700" fill="#ffffff">' + safeCaption + '</text></svg>';
+
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+
+}
+
+function preloadSlide(index){
+
+    if(sliderPreloaded.has(index) || sliderFailed.has(index)){
+        return;
+    }
+
+    sliderPreloaded.add(index);
+
+    const probe = new Image();
+
+    probe.onerror = function(){
+        sliderFailed.add(index);
+    };
+
+    probe.src = typingSliderImages[index].src;
+
+}
+
+function buildSliderDots(){
+
+    const dots = document.getElementById("typingSliderDots");
+
+    if(!dots || dots.childElementCount){
+        return;
+    }
+
+    typingSliderImages.forEach(function(slide, i){
+
+        const dot = document.createElement("button");
+
+        dot.type = "button";
+        dot.className = "slider-dot";
+        dot.setAttribute("aria-label", "Show image " + (i + 1) + ": " + slide.caption);
+        dot.addEventListener("click", function(){
+            goToSlide(i);
+        });
+
+        dots.appendChild(dot);
+
+    });
+
+}
+
+function updateSliderDots(){
+
+    const dots = document.getElementById("typingSliderDots");
+
+    if(!dots){
+        return;
+    }
+
+    Array.prototype.forEach.call(dots.children, function(dot, i){
+        const active = i === typingSliderIndex;
+        dot.classList.toggle("active", active);
+        dot.setAttribute("aria-current", active ? "true" : "false");
+    });
+
+}
 
 function renderTypingSlider(){
 
     const img = document.getElementById("typingSliderImg");
     const caption = document.getElementById("typingSliderCaption");
     const counter = document.getElementById("typingSliderCounter");
+    const box = document.getElementById("typingSlider");
 
-    if(!img || !caption || !counter){
+    if(!img || !caption || !counter || !box){
         return;
     }
 
-    const current = typingSliderImages[typingSliderIndex];
+    const index = typingSliderIndex;
+    const current = typingSliderImages[index];
 
-    img.src = current.src;
-    img.alt = current.caption;
     caption.textContent = current.caption;
-    counter.textContent =
-        (typingSliderIndex + 1) + " / " + typingSliderImages.length;
+    counter.textContent = (index + 1) + " / " + typingSliderImages.length;
+    img.alt = current.caption;
+
+    updateSliderDots();
+
+    /* Already showing this slide — nothing to do. */
+    if(img.dataset.index === String(index) && img.getAttribute("src")){
+        return;
+    }
+
+    img.dataset.index = String(index);
+
+    const showFallback = function(){
+        sliderFailed.add(index);
+        if(typingSliderIndex === index){
+            img.src = sliderFallbackArt(index, current.caption);
+        }
+    };
+
+    box.classList.add("is-loading");
+
+    img.onload = function(){
+        box.classList.remove("is-loading");
+    };
+
+    img.onerror = function(){
+
+        if(sliderFailed.has(index) && img.src.indexOf("data:") === 0){
+            box.classList.remove("is-loading");
+            return;
+        }
+
+        showFallback();
+
+    };
+
+    img.src = sliderFailed.has(index)
+        ? sliderFallbackArt(index, current.caption)
+        : current.src;
+
+    /* Fetch only the slide that is most likely needed next. */
+    preloadSlide((index + 1) % typingSliderImages.length);
+
+}
+
+function goToSlide(index){
+
+    const total = typingSliderImages.length;
+
+    typingSliderIndex = ((index % total) + total) % total;
+
+    renderTypingSlider();
+    startSliderAutoplay();
 
 }
 
 function changeSliderImage(direction){
 
-    typingSliderIndex =
-        (typingSliderIndex + direction + typingSliderImages.length) %
-        typingSliderImages.length;
+    goToSlide(typingSliderIndex + direction);
+
+}
+
+function stopSliderAutoplay(){
+
+    clearTimeout(sliderTimer);
+    sliderTimer = null;
+
+}
+
+function startSliderAutoplay(){
+
+    stopSliderAutoplay();
+
+    const home = document.getElementById("home");
+
+    if(
+        !sliderReady ||
+        sliderPaused ||
+        !sliderInView ||
+        document.hidden ||
+        !home ||
+        !home.classList.contains("active") ||
+        (window.matchMedia &&
+         window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+    ){
+        return;
+    }
+
+    sliderTimer = setTimeout(function(){
+        changeSliderImage(1);
+    }, SLIDER_DELAY_MS);
+
+}
+
+function initTypingSlider(){
+
+    const box = document.getElementById("typingSlider");
+
+    if(!box || sliderReady){
+        return;
+    }
+
+    buildSliderDots();
+
+    /* Pause while the visitor is interacting with the slider. */
+    const pause = function(){
+        sliderPaused = true;
+        stopSliderAutoplay();
+    };
+
+    const resume = function(){
+        sliderPaused = false;
+        startSliderAutoplay();
+    };
+
+    box.addEventListener("mouseenter", pause);
+    box.addEventListener("mouseleave", resume);
+    box.addEventListener("focusin", pause);
+    box.addEventListener("focusout", resume);
+
+    /* Keyboard: ← / → while the slider has focus. */
+    box.addEventListener("keydown", function(event){
+
+        if(event.key === "ArrowLeft"){
+            event.preventDefault();
+            changeSliderImage(-1);
+        }else if(event.key === "ArrowRight"){
+            event.preventDefault();
+            changeSliderImage(1);
+        }
+
+    });
+
+    /* Touch: swipe left / right. */
+    let touchStartX = null;
+
+    box.addEventListener("touchstart", function(event){
+        touchStartX = event.touches[0].clientX;
+        pause();
+    }, { passive:true });
+
+    box.addEventListener("touchend", function(event){
+
+        if(touchStartX !== null){
+
+            const distance = event.changedTouches[0].clientX - touchStartX;
+
+            if(Math.abs(distance) > 40){
+                changeSliderImage(distance < 0 ? 1 : -1);
+            }
+
+            touchStartX = null;
+
+        }
+
+        resume();
+
+    }, { passive:true });
+
+    /* Stop working when the tab is hidden or the slider is off-screen. */
+    document.addEventListener("visibilitychange", function(){
+
+        if(document.hidden){
+            stopSliderAutoplay();
+        }else{
+            startSliderAutoplay();
+        }
+
+    });
+
+    if("IntersectionObserver" in window){
+
+        new IntersectionObserver(function(entries){
+
+            sliderInView = entries[0].isIntersecting;
+
+            if(sliderInView){
+                startSliderAutoplay();
+            }else{
+                stopSliderAutoplay();
+            }
+
+        }, { threshold:.25 }).observe(box);
+
+    }
+
+    sliderReady = true;
 
     renderTypingSlider();
+    startSliderAutoplay();
 
 }
 
@@ -3802,12 +4235,6 @@ window.addEventListener("popstate", function(event){
 
 document.addEventListener("DOMContentLoaded", function(){
 
-    /* Each enhancement runs independently — if one throws (e.g.
-       localStorage blocked in a locked-down browser mode), it
-       must never stop the others, and it must never stop the
-       page from being visible (visibility no longer depends on
-       any of this running at all). */
-
     function safely(fn){
         try{
             fn();
@@ -3824,18 +4251,35 @@ document.addEventListener("DOMContentLoaded", function(){
         const initialTarget =
             initialFromHash && document.getElementById(initialFromHash);
 
-        if(initialTarget && initialTarget.classList.contains("page")){
-            showPage(initialFromHash, { skipHistory:true });
-        }else{
-            renderHomeStatsChart();
-        }
+        const startPage =
+            (initialTarget && initialTarget.classList.contains("page"))
+                ? initialFromHash
+                : "home";
+
+        showPage(startPage, { skipHistory:true });
 
     });
 
     safely(refreshAiCoachTip);
-    safely(function(){ renderGoalProgress(loadGoal()); });
-    safely(renderTypingSlider);
+    safely(initTypingSlider);
     safely(observeReveals);
+
+    /* Close the mobile menu with Escape, and when the window is widened. */
+    safely(function(){
+
+        document.addEventListener("keydown", function(event){
+            if(event.key === "Escape"){
+                closeMobileMenu();
+            }
+        });
+
+        window.addEventListener("resize", function(){
+            if(window.innerWidth > 1280){
+                closeMobileMenu();
+            }
+        });
+
+    });
 
     /* Clear a field's error the moment the user starts fixing it. */
     safely(function(){
