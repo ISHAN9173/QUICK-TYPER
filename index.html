@@ -15,7 +15,38 @@
 <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin="">
+    crossorigin=""
+    onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';">
+
+<script>
+    /* If the primary Leaflet CDN (unpkg) is blocked or offline,
+       fall back to a second CDN instead of leaving the map dead. */
+    function loadLeafletFallback(){
+
+        if(window.L){
+            return;
+        }
+
+        var fallbackScript = document.createElement("script");
+        fallbackScript.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js";
+        fallbackScript.crossOrigin = "";
+
+        fallbackScript.onload = function(){
+            if(typeof attemptMapInit === "function"){
+                attemptMapInit();
+            }
+        };
+
+        fallbackScript.onerror = function(){
+            if(typeof showMapFallback === "function"){
+                showMapFallback();
+            }
+        };
+
+        document.head.appendChild(fallbackScript);
+
+    }
+</script>
 
 </head>
 
@@ -331,6 +362,46 @@
             <button class="btn-ai-refresh" onclick="refreshAiCoachTip()">
                 New tip ↻
             </button>
+
+        </div>
+
+
+        <!-- TYPING IN MOTION GALLERY -->
+        <div class="about-card gallery-card reveal">
+
+            <h2>Typing in Motion</h2>
+            <p>Click through a few snapshots for some keyboard inspiration.</p>
+
+            <div class="image-slider" id="typingSlider">
+
+                <button
+                    type="button"
+                    class="slider-arrow slider-arrow-left"
+                    onclick="changeSliderImage(-1)"
+                    aria-label="Previous image">
+                    ‹
+                </button>
+
+                <img
+                    id="typingSliderImg"
+                    class="slider-img"
+                    src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=900&q=80"
+                    alt="Hands typing on a keyboard">
+
+                <button
+                    type="button"
+                    class="slider-arrow slider-arrow-right"
+                    onclick="changeSliderImage(1)"
+                    aria-label="Next image">
+                    ›
+                </button>
+
+            </div>
+
+            <div class="slider-meta">
+                <span id="typingSliderCaption">Focused typing session</span>
+                <span id="typingSliderCounter">1 / 5</span>
+            </div>
 
         </div>
 
@@ -954,6 +1025,8 @@
             </div>
 
 
+            <div class="practice-work">
+
             <div class="card practice-box">
 
                 <div
@@ -1063,6 +1136,8 @@
 
             </div>
 
+
+            <div class="practice-keyboards">
 
             <!-- =========================================
                  INTERACTIVE KEYBOARD
@@ -1338,6 +1413,10 @@
                     </div>
 
                 </div>
+
+            </div>
+
+            </div>
 
             </div>
 
@@ -1724,7 +1803,12 @@
 
             <div class="login-logo">QuickType</div>
             <div class="page-kicker kicker-login" style="justify-content:center;margin:0 auto 10px">🔐 SECURE ACCESS</div>
-            <div class="login-subtitle">Access your QuickType workspace</div>
+            <div class="login-subtitle" id="authSubtitle">Access your QuickType workspace</div>
+
+            <div class="auth-tabs" id="authTabs">
+                <button type="button" class="auth-tab active" id="authTabLogin" onclick="showAuthMode('login')">Login</button>
+                <button type="button" class="auth-tab" id="authTabSignup" onclick="showAuthMode('signup')">Create Account</button>
+            </div>
 
             <div class="form-card">
 
@@ -1742,9 +1826,34 @@
 
                 </form>
 
+                <form id="signupForm" style="display:none">
+
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" placeholder="Enter your name" required>
+
+                    <label>Email Address</label>
+                    <input type="email" id="signupEmail" placeholder="Enter your email" required>
+
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="Create a password" required>
+
+                    <label>Confirm Password</label>
+                    <input type="password" id="signupConfirmPassword" placeholder="Re-enter your password" required>
+
+                    <button type="submit" class="btn btn-primary login-button">
+                        Create Account
+                    </button>
+
+                </form>
+
                 <div id="loginMessage" class="form-message"></div>
 
-                <div class="demo-note">
+                <p class="auth-switch" id="authSwitch">
+                    Don't have an account?
+                    <button type="button" class="auth-switch-link" onclick="showAuthMode('signup')">Create one</button>
+                </p>
+
+                <div class="demo-note" id="demoNote">
                     <strong>Demo Login</strong><br>
                     Email: admin@gmail.com<br>
                     Password: 12345
@@ -1863,7 +1972,8 @@
 
 <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    crossorigin="">
+    crossorigin=""
+    onerror="loadLeafletFallback()">
 </script>
 
 
