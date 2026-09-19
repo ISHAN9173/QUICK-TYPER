@@ -1138,6 +1138,67 @@ header{
 
 
 /* =========================================================
+   PRACTICE WORK AREA — typing box + keyboard side by side
+========================================================= */
+
+.practice-work{
+    display:grid;
+
+    grid-template-columns:1fr;
+
+    gap:18px;
+
+    align-items:start;
+}
+
+.practice-keyboards{
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+}
+
+@media (min-width:1150px){
+
+    .practice-work{
+        grid-template-columns:minmax(0,1fr) 360px;
+    }
+
+    .practice-keyboards{
+        position:sticky;
+
+        top:95px;
+    }
+
+    .practice-keyboards .keyboard-wrapper{
+        margin-top:0;
+
+        overflow-x:visible;
+    }
+
+    .practice-keyboards .keyboard{
+        min-width:0;
+    }
+
+    .practice-keyboards .keyboard-row{
+        gap:4px;
+    }
+
+    .practice-keyboards .key{
+        min-width:0;
+
+        height:32px;
+
+        font-size:10px;
+
+        border-radius:6px;
+    }
+
+}
+
+
+/* =========================================================
    PRACTICE TARGET
 ========================================================= */
 
@@ -1967,6 +2028,85 @@ footer{
     }
 }
 
+.gallery-card{
+    margin-top:22px;
+}
+
+.image-slider{
+    position:relative;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:16px;
+    overflow:hidden;
+
+    background:rgba(255,255,255,.04);
+}
+
+.slider-img{
+    width:100%;
+    max-height:360px;
+
+    object-fit:cover;
+    display:block;
+
+    animation:sliderFade .35s ease;
+}
+
+@keyframes sliderFade{
+    from{ opacity:0; transform:scale(1.02); }
+    to{ opacity:1; transform:scale(1); }
+}
+
+.slider-arrow{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+
+    width:40px;
+    height:40px;
+
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.25);
+
+    background:rgba(0,0,0,.45);
+    color:#fff;
+
+    font-size:22px;
+    line-height:1;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    transition:.2s;
+}
+
+.slider-arrow:hover{
+    background:var(--primary);
+    border-color:transparent;
+}
+
+.slider-arrow-left{
+    left:14px;
+}
+
+.slider-arrow-right{
+    right:14px;
+}
+
+.slider-meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-top:12px;
+    color:var(--muted);
+    font-size:13px;
+}
+
 
 /* =========================================================
    FEEDBACK & LOGIN FORMS
@@ -2074,6 +2214,60 @@ footer{
 .login-button{
     width:100%;
     margin-top:22px;
+}
+
+.auth-tabs{
+    display:flex;
+    gap:8px;
+    margin:18px 0 22px;
+    padding:4px;
+
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    border-radius:14px;
+}
+
+.auth-tab{
+    flex:1;
+    padding:10px 12px;
+
+    border:none;
+    border-radius:10px;
+    background:transparent;
+
+    font-family:inherit;
+    font-weight:700;
+    font-size:14px;
+    color:var(--muted);
+
+    cursor:pointer;
+    transition:background .2s ease, color .2s ease;
+}
+
+.auth-tab.active{
+    background:linear-gradient(135deg,var(--primary),var(--primary2));
+    color:#fff;
+}
+
+.auth-switch{
+    margin-top:16px;
+    text-align:center;
+    font-size:14px;
+    color:var(--muted);
+}
+
+.auth-switch-link{
+    border:none;
+    background:none;
+    padding:0;
+    margin-left:4px;
+
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    color:var(--primary2);
+    text-decoration:underline;
+    cursor:pointer;
 }
 
 .form-message{
