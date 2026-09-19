@@ -12,49 +12,10 @@
 
 <link rel="stylesheet" href="css/style.css">
 
-<link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin=""
-    onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';">
-
-<script>
-    /* If the primary Leaflet CDN (unpkg) is blocked or offline,
-       fall back to a second CDN instead of leaving the map dead. */
-    function loadLeafletFallback(){
-
-        if(window.L){
-            return;
-        }
-
-        var fallbackScript = document.createElement("script");
-        fallbackScript.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js";
-        fallbackScript.crossOrigin = "";
-
-        fallbackScript.onload = function(){
-            if(typeof attemptMapInit === "function"){
-                attemptMapInit();
-            }
-        };
-
-        fallbackScript.onerror = function(){
-            if(typeof showMapFallback === "function"){
-                showMapFallback();
-            }
-        };
-
-        document.head.appendChild(fallbackScript);
-
-    }
-</script>
-
 </head>
 
 
 <body>
-
-<div id="pageCurtain"></div>
-
 
 <!-- =====================================================
      HEADER
@@ -66,7 +27,7 @@
         Quick<span>Type</span>
     </div>
 
-    <nav class="nav">
+    <nav class="nav" id="mainNav" aria-label="Main navigation">
 
         <button
             onclick="showPage('home')"
@@ -150,6 +111,11 @@
 
     <button
         class="mobile-menu"
+        id="mobileMenuBtn"
+        type="button"
+        aria-label="Toggle navigation menu"
+        aria-controls="mainNav"
+        aria-expanded="false"
         onclick="toggleMobileMenu()">
         ☰
     </button>
@@ -372,7 +338,13 @@
             <h2>Typing in Motion</h2>
             <p>Click through a few snapshots for some keyboard inspiration.</p>
 
-            <div class="image-slider" id="typingSlider">
+            <div
+                class="image-slider is-loading"
+                id="typingSlider"
+                tabindex="0"
+                role="region"
+                aria-roledescription="carousel"
+                aria-label="Typing in motion gallery — use the left and right arrow keys">
 
                 <button
                     type="button"
@@ -385,7 +357,10 @@
                 <img
                     id="typingSliderImg"
                     class="slider-img"
-                    src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=900&q=80"
+                    src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1200&q=75"
+                    width="1200"
+                    height="675"
+                    decoding="async"
                     alt="Hands typing on a keyboard">
 
                 <button
@@ -396,11 +371,18 @@
                     ›
                 </button>
 
+                <div
+                    class="slider-dots"
+                    id="typingSliderDots"
+                    role="group"
+                    aria-label="Choose an image">
+                </div>
+
             </div>
 
             <div class="slider-meta">
                 <span id="typingSliderCaption">Focused typing session</span>
-                <span id="typingSliderCounter">1 / 5</span>
+                <span id="typingSliderCounter">1 / 12</span>
             </div>
 
         </div>
@@ -1757,16 +1739,19 @@
 
     <div class="form-card">
 
-        <form onsubmit="submitFeedback(event)">
+        <form onsubmit="submitFeedback(event)" novalidate>
 
             <label>Name</label>
             <input type="text" id="feedbackName" placeholder="Enter your name" required>
+            <div class="field-error" id="feedbackNameError"></div>
 
             <label>Email</label>
             <input type="email" id="feedbackEmail" placeholder="Enter your email" required>
+            <div class="field-error" id="feedbackEmailError"></div>
 
             <label>Feedback</label>
             <textarea id="feedbackMessageInput" placeholder="Write your feedback here..." required></textarea>
+            <div class="field-error" id="feedbackMessageInputError"></div>
 
             <div style="text-align:center;margin-top:22px">
                 <button class="btn btn-primary" type="submit">
@@ -1812,13 +1797,15 @@
 
             <div class="form-card">
 
-                <form id="loginForm">
+                <form id="loginForm" novalidate>
 
                     <label>Email Address</label>
                     <input type="email" id="loginEmail" placeholder="Enter your email" required>
+            <div class="field-error" id="loginEmailError"></div>
 
                     <label>Password</label>
                     <input type="password" id="loginPassword" placeholder="Enter your password" required>
+            <div class="field-error" id="loginPasswordError"></div>
 
                     <button type="submit" class="btn btn-primary login-button">
                         Login
@@ -1826,19 +1813,23 @@
 
                 </form>
 
-                <form id="signupForm" style="display:none">
+                <form id="signupForm" style="display:none" novalidate>
 
                     <label>Full Name</label>
                     <input type="text" id="signupName" placeholder="Enter your name" required>
+            <div class="field-error" id="signupNameError"></div>
 
                     <label>Email Address</label>
                     <input type="email" id="signupEmail" placeholder="Enter your email" required>
+            <div class="field-error" id="signupEmailError"></div>
 
                     <label>Password</label>
                     <input type="password" id="signupPassword" placeholder="Create a password" required>
+            <div class="field-error" id="signupPasswordError"></div>
 
                     <label>Confirm Password</label>
                     <input type="password" id="signupConfirmPassword" placeholder="Re-enter your password" required>
+            <div class="field-error" id="signupConfirmPasswordError"></div>
 
                     <button type="submit" class="btn btn-primary login-button">
                         Create Account
@@ -1923,7 +1914,13 @@
         </aside>
 
         <section class="map-wrapper">
-            <div id="quickTypeMap"></div>
+            <div id="quickTypeMap">
+                <div class="map-fallback">
+                    <div class="map-fallback-icon">🗺️</div>
+                    <h3>Loading map…</h3>
+                    <p>The map loads the first time you open this page.</p>
+                </div>
+            </div>
         </section>
 
     </div>
@@ -1968,13 +1965,6 @@
 <!-- =========================================================
      ABOUT / FEEDBACK / LOGIN / MAP — SUPPORTING FEATURES
 ========================================================= -->
-
-
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    crossorigin=""
-    onerror="loadLeafletFallback()">
-</script>
 
 
 <!-- =====================================================
