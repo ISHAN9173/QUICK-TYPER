@@ -31,9 +31,21 @@
 
 /* =========================================================
    TEST PARAGRAPHS
+
+   Passages are grouped by test length so the wording, vocabulary
+   and overall length scale with the selected timestamp: the
+   1-minute pool stays short and punchy, the 3-minute pool is
+   noticeably longer with richer vocabulary, and the 5-minute pool
+   is the longest and most descriptive of all. newTest() below
+   also chains a fresh passage onto the current one automatically
+   if a fast typist reaches the end before the clock runs out, so
+   the reference text never runs dry mid-test.
 ========================================================= */
 
-const paragraphs = [
+const paragraphPools = {
+
+    /* 60 seconds — short, direct passages. */
+    60:[
 
 `Learning new skills demands time, patience and consistent effort. Typing is a genuinely valuable digital skill because it lets people express ideas swiftly and clearly. Deliberate practice trains your fingers to recognize the position of every key. Over time, you will develop sharper rhythm, fewer errors and greater confidence.`,
 
@@ -45,7 +57,47 @@ const paragraphs = [
 
 `A healthy environment matters for every living creature on Earth. Forests shelter animals, purify the air and help sustain the balance of nature. Protecting natural environments requires everyday responsibility. Reducing waste, conserving water, planting trees and respecting wildlife are simple actions that contribute to a healthier planet.`
 
-];
+    ],
+
+    /* 180 seconds — longer passages with a broader vocabulary. */
+    180:[
+
+`Learning any new skill demands time, patience and consistent, deliberate effort, and typing is no exception to that general rule. Typing is a genuinely valuable digital skill because it lets people express ideas swiftly, clearly and confidently across emails, documents, forums and countless everyday applications. Deliberate practice gradually trains your fingers to recognize the exact position of every key without conscious thought, freeing your mind to focus on the words themselves rather than the mechanics of pressing them. Over time, disciplined repetition produces sharper rhythm, fewer careless errors, steadier posture and far greater overall confidence. Typists who practice regularly often discover that their thoughts flow onto the screen almost as quickly as they occur, turning a once tedious chore into an almost effortless extension of thinking itself.`,
+
+`Modern technology has fundamentally reshaped education, communication and the everyday exchange of knowledge across the globe. Students today can access textbooks, video lectures, interactive courses and enormous archives of valuable information from almost anywhere with an internet connection, collapsing distances that once made learning slow and expensive. Technology becomes genuinely powerful only when it is used responsibly, thoughtfully and with clear intention rather than as a constant distraction. Sharp focus, careful research, critical thinking and consistent practice help ambitious students transform ordinary digital tools into extraordinary learning resources. Teachers increasingly rely on collaborative platforms, adaptive software and instant feedback systems to personalize instruction, while learners themselves must cultivate the discipline to sift reliable sources from noise in an age of overwhelming information.`,
+
+`Success is often the quiet result of small, unglamorous improvements made consistently over a surprisingly long period of time rather than any single dramatic breakthrough. People frequently expect instant results when learning something unfamiliar, yet meaningful, lasting progress usually demands considerable patience, humility and a willingness to fail repeatedly along the way. Mistakes should be viewed as valuable opportunities to learn rather than embarrassing reasons to quit or abandon a goal altogether. Ambitious individuals who track their gradual progress, celebrate modest milestones and remain curious about their own weaknesses tend to outperform those who simply chase talent or shortcuts. Genuine mastery, whether in typing, music, sport or craftsmanship, is almost always built one deliberate, unremarkable repetition at a time.`,
+
+`The internet has made it astonishingly possible for people scattered around the entire world to communicate and exchange information almost instantly, reshaping commerce, culture and daily life within a single generation. Businesses increasingly rely on online services to reach customers efficiently, students turn to abundant digital resources for education and research, and families use countless communication platforms to stay meaningfully connected across vast distances. This constant connectivity brings tremendous convenience, yet it also introduces new challenges: misinformation spreads rapidly, attention becomes fragmented, and privacy requires far more vigilance than in earlier eras. Navigating this environment wisely means balancing genuine curiosity with healthy skepticism, embracing useful tools while guarding against their more corrosive side effects on focus and wellbeing.`,
+
+`A healthy environment matters immensely for every living creature that shares this planet, from towering forests to microscopic organisms in distant soil. Forests shelter countless animals, purify the surrounding air and help sustain the delicate balance of nature that supports agriculture, weather patterns and clean water supplies worldwide. Protecting natural environments requires everyday responsibility from individuals, communities and governments alike, not merely occasional gestures during designated awareness campaigns. Reducing waste, conserving water, planting trees, supporting renewable energy and respecting wildlife habitats are simple yet meaningful actions that collectively contribute to a healthier, more resilient planet. Future generations will inherit whatever balance we strike today, making thoughtful stewardship an urgent and shared obligation rather than an optional afterthought.`
+
+    ],
+
+    /* 300 seconds — the longest, most descriptive passages. */
+    300:[
+
+`Learning any new skill demands time, patience and consistent, deliberate effort, and typing is certainly no exception to that timeless rule. Typing is a genuinely valuable digital skill because it lets people express ideas swiftly, clearly and confidently across emails, reports, essays, forums and countless everyday applications that define modern working life. Deliberate practice gradually trains your fingers to recognize the exact position of every key without conscious thought, freeing your mind to focus entirely on the words themselves rather than the underlying mechanics of pressing them one at a time. Over time, disciplined repetition produces sharper rhythm, fewer careless errors, steadier posture and far greater overall confidence at the keyboard. Typists who practice regularly and deliberately often discover that their thoughts flow onto the screen almost as quickly as they occur, turning a once tedious, mechanical chore into an almost effortless extension of thinking itself. This transformation rarely happens overnight; it emerges gradually from short, focused sessions repeated day after day, week after week, until accuracy and speed finally arrive together rather than as separate, competing goals.`,
+
+`Modern technology has fundamentally reshaped education, communication and the everyday exchange of knowledge across the entire globe in ways earlier generations could scarcely have imagined. Students today can access textbooks, recorded lectures, interactive courses and enormous digital archives of valuable information from almost anywhere with a reliable internet connection, collapsing distances that once made serious learning slow, expensive and geographically limited. Technology becomes genuinely powerful only when it is used responsibly, thoughtfully and with clear intention rather than as a constant, addictive distraction competing for every spare moment of attention. Sharp focus, careful research, critical thinking and consistent, patient practice help ambitious students transform ordinary digital tools into extraordinary learning resources capable of accelerating growth dramatically. Teachers increasingly rely on collaborative platforms, adaptive software and instant feedback systems to personalize instruction for every individual learner, while students themselves must cultivate the discipline required to sift reliable sources from overwhelming noise in an age defined by information abundance rather than scarcity.`,
+
+`Success is often the quiet, unglamorous result of small improvements made consistently over a surprisingly long period of time rather than any single dramatic breakthrough or stroke of luck. People frequently expect instant results when learning something unfamiliar, yet meaningful, lasting progress usually demands considerable patience, genuine humility and a stubborn willingness to fail repeatedly along the winding road toward mastery. Mistakes should be viewed as valuable, even necessary opportunities to learn rather than embarrassing reasons to quit or abandon a worthwhile goal altogether at the first sign of difficulty. Ambitious individuals who track their gradual progress carefully, celebrate modest milestones honestly and remain endlessly curious about their own weaknesses tend to outperform those who simply chase raw talent or convenient shortcuts. Genuine mastery, whether in typing, music, athletics or craftsmanship, is almost always constructed one deliberate, unremarkable repetition at a time, quietly compounding until the results finally become impossible to ignore.`,
+
+`The internet has made it astonishingly possible for people scattered across the entire world to communicate and exchange information almost instantly, reshaping global commerce, culture and daily life within the span of a single generation. Businesses increasingly rely on online services to reach customers efficiently and affordably, students turn to abundant digital resources for education and independent research, and families use countless communication platforms to stay meaningfully connected across vast, once impossible distances. This constant connectivity brings tremendous convenience and opportunity, yet it also introduces genuinely new challenges: misinformation spreads with alarming speed, attention becomes fragmented across dozens of competing notifications, and personal privacy requires far more vigilance than in earlier, simpler eras of communication. Navigating this environment wisely means balancing genuine curiosity with healthy skepticism, embracing useful tools while guarding against their more corrosive side effects on focus, memory and overall wellbeing over time.`,
+
+`A healthy environment matters immensely for every living creature that shares this remarkable planet, from towering ancient forests to microscopic organisms hidden within distant soil. Forests shelter countless species of animals, purify the surrounding air and help sustain the delicate balance of nature that quietly supports agriculture, weather patterns and clean water supplies for billions of people worldwide. Protecting natural environments requires genuine, everyday responsibility from individuals, communities, corporations and governments alike, not merely occasional gestures reserved for designated awareness campaigns once a year. Reducing waste, conserving water, planting trees, supporting renewable energy and respecting fragile wildlife habitats are simple yet meaningful actions that collectively contribute to a healthier, more resilient planet for generations still to come. Future generations will inherit whatever ecological balance we strike today, making thoughtful, consistent stewardship an urgent and shared obligation rather than a distant, optional afterthought that can be postponed indefinitely.`
+
+    ]
+
+};
+
+/* Flat list kept for backward compatibility with any code that
+   expects a single combined pool of passages. */
+const paragraphs = [].concat(
+    paragraphPools[60],
+    paragraphPools[180],
+    paragraphPools[300]
+);
 
 
 /* =========================================================
@@ -90,7 +142,12 @@ const practiceModes = {
             "practice makes progress every single day",
             "quick typing requires accuracy and rhythm",
             "learn every key before chasing speed",
-            "consistent practice builds muscle memory"
+            "consistent practice builds muscle memory",
+            "a calm mind and steady hands type best",
+            "great typists trust their fingers, not their eyes",
+            "small daily sessions beat rare long ones",
+            "confidence grows quietly with every accurate line",
+            "focus on rhythm and the speed will follow"
         ]
     },
 
@@ -106,7 +163,16 @@ const practiceModes = {
             "zxcvb",
             "asdfg qwert zxcvb",
             "red fed wed sad dad",
-            "west rest test desk"
+            "west rest test desk",
+            "great sweater dresses fade",
+            "average dresser deserves care",
+            "grab a fresh cedar tree",
+            "sad geese gather at dawn",
+            "create a great garden fence",
+            "gather fresh berries before dark",
+            "watered gardens grow greatest crops",
+            "brave zebras dashed after a great feast",
+            "sacred trees rest beside a great cave"
         ]
     },
 
@@ -122,7 +188,16 @@ const practiceModes = {
             "nm",
             "yuiop hjkl nm",
             "jump moon look",
-            "you know how"
+            "you know how",
+            "honey milk in a mug",
+            "a monkey looks up high",
+            "pink lily blooms in july",
+            "unlikely opinion on lunch",
+            "kindly join him in kyoto",
+            "many hills hold humpy hills",
+            "you look mighty happy today",
+            "nobody hopped on my minivan",
+            "hip hip hooray, holiday plan"
         ]
     },
 
@@ -138,7 +213,10 @@ const practiceModes = {
             "fj fj dk dk",
             "ask sad fall",
             "dad has all",
-            "glass flask"
+            "glass flask",
+            "a lad sat; a glass fell",
+            "half a flask ashed a jar",
+            "salad; a glad lass had all"
         ]
     },
 
@@ -154,7 +232,10 @@ const practiceModes = {
             "qwerty uiop",
             "type write quiet",
             "power tower",
-            "quote poetry"
+            "quote poetry",
+            "type quietly, write it out",
+            "our route required quiet power",
+            "quiet writers type witty poetry"
         ]
     },
 
@@ -170,7 +251,10 @@ const practiceModes = {
             "mix box",
             "maximum",
             "zinc carbon",
-            "zoom mix move"
+            "zoom mix move",
+            "vamoose, my zombie van moves",
+            "count boxes, mix numbers, zoom",
+            "an even mix cannot move mountains"
         ]
     },
 
@@ -186,7 +270,10 @@ const practiceModes = {
             "12345 67890",
             "1122334455",
             "2468 13579",
-            "2026 2027 1234"
+            "2026 2027 1234",
+            "order 4821 shipped on 09 15",
+            "invoice 77234 totals 1690 50",
+            "flight 208 departs at 14 45"
         ]
     },
 
@@ -202,7 +289,10 @@ const practiceModes = {
             "123 456 789",
             "2026 0815",
             "100 250 500 1000",
-            "12345 67890"
+            "12345 67890",
+            "72 145 398 610 927",
+            "4500 3200 1800 900 275",
+            "10 20 30 40 50 60 70 80"
         ]
     },
 
@@ -218,7 +308,10 @@ const practiceModes = {
             "QuickType Keyboard Training",
             "Practice Makes Progress",
             "Accuracy Comes Before Speed",
-            "Build Better Typing Habits"
+            "Build Better Typing Habits",
+            "New York, London And Tokyo",
+            "Monday, Wednesday And Friday",
+            "United States Of America"
         ]
     },
 
@@ -234,7 +327,10 @@ const practiceModes = {
             "< > / \\ |",
             "+ = - _",
             ": ; ' \" , . ?",
-            "!@#$%^&*()"
+            "!@#$%^&*()",
+            "she said, \"wait — is that true?\"",
+            "total = (price * qty) - discount;",
+            "email: name@example.com; #urgent!"
         ]
     },
 
@@ -250,7 +346,10 @@ const practiceModes = {
             "User123 @ QuickType.com",
             "Hello, World! 123",
             "Speed > mistakes",
-            "Accuracy: 98%+"
+            "Accuracy: 98%+",
+            "Meeting #4 starts at 9:30 AM.",
+            "Order ID 55210 shipped — thanks!",
+            "Password must have 8+ characters."
         ]
     },
 
@@ -266,7 +365,10 @@ const practiceModes = {
             "quick quick quick",
             "type type type",
             "speed speed speed",
-            "fast fingers fast mind"
+            "fast fingers fast mind",
+            "go go go go faster now",
+            "keep keep keep the rhythm up",
+            "push push push past your best"
         ]
     }
 
@@ -456,6 +558,31 @@ function startTimedTest(seconds){
 }
 
 
+function getParagraphPool(){
+
+    return (
+        paragraphPools[testDuration] ||
+        paragraphPools[60]
+    );
+
+}
+
+
+function pickRandomParagraph(){
+
+    const pool =
+        getParagraphPool();
+
+    return pool[
+        Math.floor(
+            Math.random() *
+            pool.length
+        )
+    ];
+
+}
+
+
 function newTest(){
 
     stopReadAloud();
@@ -463,12 +590,7 @@ function newTest(){
     clearInterval(timerInterval);
 
     currentParagraph =
-        paragraphs[
-            Math.floor(
-                Math.random() *
-                paragraphs.length
-            )
-        ];
+        pickRandomParagraph();
 
     startTime = null;
 
@@ -547,12 +669,55 @@ typingInput.addEventListener(
             return;
         }
 
+        extendParagraphIfNeeded();
+
         updateTypingDisplay();
 
         updateStats();
 
     }
 );
+
+
+/* If a fast typist reaches the end of the current passage before
+   the timer runs out, chain on another random passage from the
+   same duration's pool so there is always more text to type for
+   the full length of the test. */
+function extendParagraphIfNeeded(){
+
+    if(!testRunning || testFinished){
+        return;
+    }
+
+    const typedLength =
+        typingInput.value.length;
+
+    if(
+        typedLength <
+        currentParagraph.length - 20
+    ){
+        return;
+    }
+
+    const addition =
+        " " + pickRandomParagraph();
+
+    currentParagraph += addition;
+
+    [...addition].forEach(
+        character=>{
+
+            const span =
+                document.createElement("span");
+
+            span.textContent = character;
+
+            referenceText.appendChild(span);
+
+        }
+    );
+
+}
 
 
 function startClock(){
