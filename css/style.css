@@ -867,11 +867,21 @@ header{
 
     line-height:1.85;
 
+    text-align:left;
+
     margin-bottom:16px;
+
+    max-width:100%;
+
+    overflow-wrap:break-word;
+
+    word-break:break-word;
 }
 
 .reference-text span{
     border-radius:4px;
+
+    white-space:pre-wrap;
 }
 
 .reference-text span.correct{
@@ -1269,6 +1279,8 @@ header{
 
     display:flex;
 
+    flex-wrap:wrap;
+
     align-items:center;
 
     justify-content:center;
@@ -1293,11 +1305,24 @@ header{
 
     margin-bottom:18px;
 
+    max-width:100%;
+
+    overflow-wrap:break-word;
+
     word-break:break-word;
 }
 
 .practice-target span{
     border-radius:3px;
+
+    /* Preserve single-space characters: once a span becomes a flex
+       item it is blockified, and a lone space that is both the
+       first and last character of its own line box gets collapsed
+       to zero width under normal white-space rules. white-space:pre
+       stops that collapse so spaces between practice words stay
+       visible, while flex-wrap above keeps long patterns from
+       running past the edge of the box. */
+    white-space:pre;
 }
 
 .practice-target span.correct{
