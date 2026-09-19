@@ -7,15 +7,15 @@
 
 const paragraphs = [
 
-`Learning new skills takes time, patience and consistent effort. Typing is a useful digital skill because it allows people to communicate ideas quickly and efficiently. Regular practice helps your fingers remember the position of each key. Over time, you can develop better rhythm, fewer mistakes and greater confidence.`,
+`Learning new skills demands time, patience and consistent effort. Typing is a genuinely valuable digital skill because it lets people express ideas swiftly and clearly. Deliberate practice trains your fingers to recognize the position of every key. Over time, you will develop sharper rhythm, fewer errors and greater confidence.`,
 
-`Modern technology has transformed education and communication. Students can access books, courses, videos and useful information from almost anywhere. Technology is powerful when it is used responsibly. Good concentration, careful research and regular practice can help students turn digital tools into useful learning resources.`,
+`Modern technology has reshaped education and communication. Students can access books, courses, videos and valuable information from almost anywhere. Technology becomes powerful when it is used responsibly. Sharp focus, careful research and consistent practice help students transform digital tools into genuine learning resources.`,
 
-`Success is often the result of small improvements made consistently over a long period of time. People sometimes expect immediate results when learning something new, but meaningful progress usually requires patience. Mistakes should be treated as opportunities to learn rather than reasons to give up.`,
+`Success is often the result of small improvements made consistently over a long period of time. People frequently expect instant results when learning something new, yet meaningful progress usually demands patience. Mistakes should be viewed as opportunities to learn rather than reasons to quit.`,
 
-`The internet has made it possible for people around the world to communicate and share information almost instantly. Businesses use online services to reach customers, students use digital resources for education and families use communication platforms to stay connected.`,
+`The internet has made it possible for people around the world to communicate and exchange information almost instantly. Businesses rely on online services to reach customers, students turn to digital resources for education and families use communication platforms to stay connected.`,
 
-`A healthy environment is important for every living thing on Earth. Forests provide homes for animals, clean the air and help maintain the balance of nature. Protecting natural environments requires everyday responsibility. Reducing waste, saving water, planting trees and respecting wildlife are simple actions that can contribute to a healthier planet.`
+`A healthy environment matters for every living creature on Earth. Forests shelter animals, purify the air and help sustain the balance of nature. Protecting natural environments requires everyday responsibility. Reducing waste, conserving water, planting trees and respecting wildlife are simple actions that contribute to a healthier planet.`
 
 ];
 
@@ -351,6 +351,14 @@ function showPage(pageId, navOptions){
 
         if(pageId === "home" && typeof renderGoalProgress === "function"){
             renderGoalProgress(typeof loadGoal === "function" ? loadGoal() : 40);
+        }
+
+        if(pageId === "home" && typeof renderTypingSlider === "function"){
+            renderTypingSlider();
+        }
+
+        if(pageId === "map" && typeof attemptMapInit === "function"){
+            attemptMapInit();
         }
 
         if(typeof observeReveals === "function"){
@@ -954,37 +962,37 @@ const tutorialScreens = [
     {
         icon:"⌨️",
         title:"Welcome to QuickType",
-        text:"Learn the keyboard step by step and build real muscle memory."
+        text:"Learn the keyboard methodically and build genuine muscle memory through steady, focused repetition."
     },
 
     {
         icon:"🤲",
         title:"Home Row",
-        text:"Place your left fingers around A S D F and your right fingers around J K L and semicolon."
+        text:"Rest your left fingers on A S D F and your right fingers on J K L and the semicolon — this is your anchor position."
     },
 
     {
         icon:"👀",
         title:"Stop Looking Down",
-        text:"Try to look at the screen rather than the keyboard. Your fingers will gradually remember the keys."
+        text:"Train your eyes to stay on the screen instead of the keyboard. With repetition, your fingers will memorize each key automatically."
     },
 
     {
         icon:"🎯",
         title:"Accuracy First",
-        text:"Speed is useful, but accuracy comes first. Slow accurate typing becomes fast typing."
+        text:"Speed matters, but precision comes first. Slow, accurate typing naturally evolves into fast, confident typing."
     },
 
     {
         icon:"⚡",
         title:"Train Every Zone",
-        text:"Practice left hand, right hand, number row, symbols, bottom row and numpad separately."
+        text:"Strengthen each region individually — left hand, right hand, number row, symbols, bottom row and numpad."
     },
 
     {
         icon:"🏆",
         title:"You're Ready",
-        text:"Choose a practice section or take a timed typing test."
+        text:"Pick a practice drill or dive into a timed typing test to measure your progress."
     }
 
 ];
@@ -2957,6 +2965,120 @@ document
     });
 
 
+/* ---------------------------------------------------------
+   AUTH MODE SWITCH (Login / Create Account)
+--------------------------------------------------------- */
+
+function showAuthMode(mode){
+
+    const loginForm = document.getElementById("loginForm");
+    const signupForm = document.getElementById("signupForm");
+    const tabLogin = document.getElementById("authTabLogin");
+    const tabSignup = document.getElementById("authTabSignup");
+    const subtitle = document.getElementById("authSubtitle");
+    const switchNote = document.getElementById("authSwitch");
+    const demoNote = document.getElementById("demoNote");
+    const message = document.getElementById("loginMessage");
+
+    const isSignup = mode === "signup";
+
+    loginForm.style.display = isSignup ? "none" : "";
+    signupForm.style.display = isSignup ? "" : "none";
+
+    tabLogin.classList.toggle("active", !isSignup);
+    tabSignup.classList.toggle("active", isSignup);
+
+    subtitle.textContent = isSignup
+        ? "Create your QuickType account"
+        : "Access your QuickType workspace";
+
+    demoNote.style.display = isSignup ? "none" : "";
+
+    switchNote.innerHTML = isSignup
+        ? `Already have an account? <button type="button" class="auth-switch-link" onclick="showAuthMode('login')">Log in</button>`
+        : `Don't have an account? <button type="button" class="auth-switch-link" onclick="showAuthMode('signup')">Create one</button>`;
+
+    message.className = "form-message";
+    message.textContent = "";
+
+}
+
+
+/* ---------------------------------------------------------
+   CREATE ACCOUNT FORM
+--------------------------------------------------------- */
+
+document
+    .getElementById("signupForm")
+    .addEventListener("submit", function(event){
+
+        event.preventDefault();
+
+        const name = document.getElementById("signupName").value.trim();
+        const email = document.getElementById("signupEmail").value.trim();
+        const password = document.getElementById("signupPassword").value;
+        const confirmPassword = document.getElementById("signupConfirmPassword").value;
+        const message = document.getElementById("loginMessage");
+
+        let valid = true;
+
+        valid = setFieldError(
+            "signupName", "signupNameError",
+            name.length === 0
+                ? "Please enter your name."
+                : ""
+        ) && valid;
+
+        valid = setFieldError(
+            "signupEmail", "signupEmailError",
+            email.length === 0
+                ? "Please enter your email."
+                : !isValidEmail(email)
+                    ? "Enter a valid email address."
+                    : ""
+        ) && valid;
+
+        valid = setFieldError(
+            "signupPassword", "signupPasswordError",
+            password.length === 0
+                ? "Please create a password."
+                : password.length < 4
+                    ? "Password must be at least 4 characters."
+                    : ""
+        ) && valid;
+
+        valid = setFieldError(
+            "signupConfirmPassword", "signupConfirmPasswordError",
+            confirmPassword.length === 0
+                ? "Please confirm your password."
+                : confirmPassword !== password
+                    ? "Passwords do not match."
+                    : ""
+        ) && valid;
+
+        if(!valid){
+            message.className = "form-message error";
+            message.textContent = "Please fix the highlighted fields.";
+            return;
+        }
+
+        message.className = "form-message success";
+        message.textContent = "✓ Account created! You can now log in.";
+
+        localStorage.setItem("quickTypeUser", email);
+
+        showToast("Account created — welcome, " + name + "!");
+
+        event.target.reset();
+
+        setTimeout(function(){
+            showAuthMode("login");
+            document.getElementById("loginEmail").value = email;
+        }, 900);
+
+    });
+
+
 /* ============================================================
    NEXT SECTION
 ============================================================ */
@@ -2983,8 +3105,8 @@ function attemptMapInit(){
 
         initQuickTypeMap();
 
-        if(window.quickTypeMap){
-            window.quickTypeMap.invalidateSize();
+        if(quickTypeMap){
+            quickTypeMap.invalidateSize();
         }
 
     }catch(err){
@@ -3511,6 +3633,66 @@ function refreshAiCoachTip(){
 
 
 /* ---------------------------------------------------------
+   TYPING IN MOTION IMAGE SLIDER
+--------------------------------------------------------- */
+
+const typingSliderImages = [
+    {
+        src:"https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=900&q=80",
+        caption:"Focused typing session"
+    },
+    {
+        src:"https://images.unsplash.com/photo-1587440871875-191322ee64b0?auto=format&fit=crop&w=900&q=80",
+        caption:"Mechanical keyboard close-up"
+    },
+    {
+        src:"https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?auto=format&fit=crop&w=900&q=80",
+        caption:"Working at a laptop"
+    },
+    {
+        src:"https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80",
+        caption:"Remote workspace setup"
+    },
+    {
+        src:"https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80",
+        caption:"Coding on a keyboard"
+    }
+];
+
+let typingSliderIndex = 0;
+
+function renderTypingSlider(){
+
+    const img = document.getElementById("typingSliderImg");
+    const caption = document.getElementById("typingSliderCaption");
+    const counter = document.getElementById("typingSliderCounter");
+
+    if(!img || !caption || !counter){
+        return;
+    }
+
+    const current = typingSliderImages[typingSliderIndex];
+
+    img.src = current.src;
+    img.alt = current.caption;
+    caption.textContent = current.caption;
+    counter.textContent =
+        (typingSliderIndex + 1) + " / " + typingSliderImages.length;
+
+}
+
+function changeSliderImage(direction){
+
+    typingSliderIndex =
+        (typingSliderIndex + direction + typingSliderImages.length) %
+        typingSliderImages.length;
+
+    renderTypingSlider();
+
+}
+
+
+/* ---------------------------------------------------------
    DAILY WPM GOAL SLIDER
 --------------------------------------------------------- */
 
@@ -3652,6 +3834,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
     safely(refreshAiCoachTip);
     safely(function(){ renderGoalProgress(loadGoal()); });
+    safely(renderTypingSlider);
     safely(observeReveals);
 
     /* Clear a field's error the moment the user starts fixing it. */
@@ -3660,6 +3843,10 @@ document.addEventListener("DOMContentLoaded", function(){
         const fieldPairs = [
             ["loginEmail", "loginEmailError"],
             ["loginPassword", "loginPasswordError"],
+            ["signupName", "signupNameError"],
+            ["signupEmail", "signupEmailError"],
+            ["signupPassword", "signupPasswordError"],
+            ["signupConfirmPassword", "signupConfirmPasswordError"],
             ["feedbackName", "feedbackNameError"],
             ["feedbackEmail", "feedbackEmailError"],
             ["feedbackMessageInput", "feedbackMessageInputError"]
