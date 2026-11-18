@@ -3,20 +3,16 @@ setlocal enabledelayedexpansion
 title QuickType - PostgreSQL Live Database Inspector
 color 0a
 
-:: 1. Auto-detect code directory
-set "BASE_DIR=%~dp0"
-cd /d "%BASE_DIR%"
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%.."
+set "BASE_DIR=%CD%"
 
 if exist "server\view_db.js" (
     set "TARGET_DIR=%BASE_DIR%"
 ) else if exist "quicktype_code\server\view_db.js" (
-    set "TARGET_DIR=%BASE_DIR%quicktype_code"
-) else if exist "..\server\view_db.js" (
-    set "TARGET_DIR=%BASE_DIR%.."
+    set "TARGET_DIR=%BASE_DIR%\quicktype_code"
 ) else (
-    echo [ERROR] Could not find server\view_db.js!
-    pause
-    exit /b 1
+    set "TARGET_DIR=%BASE_DIR%"
 )
 
 :loop
@@ -33,11 +29,6 @@ echo.
 
 cd /d "%TARGET_DIR%"
 node server/view_db.js
-if %ERRORLEVEL% neq 0 (
-    echo.
-    echo [Notice] PostgreSQL client or database query returned code %ERRORLEVEL%.
-    echo Check that PostgreSQL service is running and server/.env has valid credentials.
-)
 
 echo.
 echo -----------------------------------------------------------------------

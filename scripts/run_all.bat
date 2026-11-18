@@ -3,13 +3,14 @@ setlocal enabledelayedexpansion
 title QuickType - Synchronized All-In-One Runner
 color 0b
 
-set "BASE_DIR=%~dp0"
-cd /d "%BASE_DIR%"
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%.."
+set "BASE_DIR=%CD%"
 
 if exist "server\index.js" (
     set "CODE_DIR=%BASE_DIR%"
 ) else if exist "quicktype_code\server\index.js" (
-    set "CODE_DIR=%BASE_DIR%quicktype_code"
+    set "CODE_DIR=%BASE_DIR%\quicktype_code"
 ) else (
     set "CODE_DIR=%BASE_DIR%"
 )
@@ -75,7 +76,7 @@ echo.
 echo -----------------------------------------------------------------------
 echo [STEP 4/5] Launching Live PostgreSQL Database Inspector...
 echo -----------------------------------------------------------------------
-start "QuickType PostgreSQL Live Database Inspector" cmd /k "cd /d \"%BASE_DIR%\" && call VIEW_POSTGRES_LIVE.bat"
+start "QuickType PostgreSQL Live Database Inspector" cmd /k "cd /d \"%SCRIPT_DIR%\" && call view_postgres_live.bat"
 echo [OK] Database monitor launched in a dedicated terminal window.
 
 echo.

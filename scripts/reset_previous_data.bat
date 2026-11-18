@@ -11,13 +11,14 @@ echo.
 set /p confirm="Are you sure you want to reset all test data? (y/n): "
 if /i not "%confirm%"=="y" exit /b 0
 
-set "BASE_DIR=%~dp0"
-cd /d "%BASE_DIR%"
+set "SCRIPT_DIR=%~dp0"
+cd /d "%SCRIPT_DIR%.."
+set "BASE_DIR=%CD%"
 
 if exist "server\apply_schema.js" (
     node server\apply_schema.js
 ) else if exist "quicktype_code\server\apply_schema.js" (
-    cd /d "%BASE_DIR%quicktype_code"
+    cd /d "%BASE_DIR%\quicktype_code"
     node server\apply_schema.js
 )
 
