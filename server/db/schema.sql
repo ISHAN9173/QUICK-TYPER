@@ -159,28 +159,34 @@ GROUP BY u.id, u.name, u.email, u.goal_wpm, u.total_tests, u.total_chars_typed;
 
 
 -- ====================================================================
--- SEED DATA
+-- SEED DATA (Clean Account — 0 Previous Tests)
 -- Login: admin@gmail.com / Password: 12345
 -- ====================================================================
-INSERT INTO users (name, email, password_hash, theme, goal_wpm, total_tests, total_chars_typed)
+INSERT INTO users (name, email, password_hash, theme, goal_wpm, total_tests, total_chars_typed, streak_current, streak_longest, practice_count, unlocked_badges)
 VALUES (
   'Admin',
   'admin@gmail.com',
   '$2b$10$VDtXLc0IrCYu8r4Bs3sZjuKQzxzYQscT3ZazbYiJR2Ilhx/EbnD7m',
   'indigo',
   50,
-  1,
-  185
+  0,
+  0,
+  0,
+  0,
+  0,
+  '[]'::jsonb
 );
 
-INSERT INTO test_history (
-  user_id, wpm, raw_wpm, accuracy, errors, correct_chars, total_chars,
-  missed_keys, duration, elapsed_secs, passage_id, typed_date
-) VALUES (
-  1, 58, 62, 96.75, 6, 179, 185,
-  '[{"key":"e","count":3},{"key":"t","count":2},{"key":"o","count":1}]'::jsonb,
-  60, 60, 1, TO_CHAR(NOW(), 'MM/DD/YYYY')
-);
+-- Note: test_history and practice_sessions start completely clean (0 previous runs)
+-- Every test taken on this laptop will be fresh real-time user data.
 
 INSERT INTO feedback (user_id, name, email, rating, category, message)
+VALUES (
+  1,
+  'Admin',
+  'admin@gmail.com',
+  5,
+  'General',
+  'QuickType real-time typing evaluation platform.'
+);
 VALUES (1, 'Admin', 'admin@gmail.com', 5, 'General', 'QuickType is fast, smooth and accurate!');
