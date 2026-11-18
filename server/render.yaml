@@ -1,0 +1,7 @@
+# QuickType — Render.com Deploy Instructions
+# Upload THIS file with your server folder (without node_modules)
+
+name: quicktype-api
+env: node
+buildCommand: npm install
+startCommand: node index.js
