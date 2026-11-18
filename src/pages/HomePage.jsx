@@ -36,6 +36,14 @@ export default function HomePageNew({
     setSliderIndex((prev) => (prev + delta + SLIDES.length) % SLIDES.length);
   };
 
+  // Auto-advance image slider smoothly every 4 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSliderIndex((prev) => (prev + 1) % SLIDES.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
   const refreshAiCoachTip = () => {
     const recentRuns = history.slice(0, 5);
     const tips = [
@@ -243,10 +251,12 @@ export default function HomePageNew({
             <img
               id="typingSliderImg"
               className="slider-img"
-              src={SLIDES[sliderIndex]?.url || "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1200&q=75"}
+              key={sliderIndex}
+              src={SLIDES[sliderIndex]?.src || SLIDES[sliderIndex]?.url || "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1200&q=75"}
               width="1200"
               height="675"
               alt={SLIDES[sliderIndex]?.caption || "Focused typing session"}
+              loading="lazy"
             />
 
             <button type="button" className="slider-arrow slider-arrow-right" onClick={() => changeSlide(1)} aria-label="Next image">
@@ -257,7 +267,7 @@ export default function HomePageNew({
               {SLIDES.map((_, i) => (
                 <button
                   key={i}
-                  className={`dot-btn ${i === sliderIndex ? 'active' : ''}`}
+                  className={`slider-dot ${i === sliderIndex ? 'active' : ''}`}
                   onClick={() => setSliderIndex(i)}
                   aria-label={`Slide ${i + 1}`}
                 />

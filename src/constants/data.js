@@ -250,10 +250,34 @@ export const THEMES = {
 };
 
 export const SLIDES = [
-  { src: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1200&q=75", caption: "Focused typing session" },
-  { src: "https://images.unsplash.com/photo-1587440871875-191322ee64b0?auto=format&fit=crop&w=1200&q=75", caption: "Mechanical keyboard close-up" },
-  { src: "https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?auto=format&fit=crop&w=1200&q=75", caption: "Working at a laptop" },
-  { src: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=75", caption: "Remote workspace setup" },
-  { src: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=75", caption: "Coding on a keyboard" },
-  { src: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=75", caption: "Code on a dark monitor" }
+  { 
+    src: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1200&q=80", 
+    url: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1200&q=80", 
+    caption: "Focused Typing Session — Ergonomic Precision" 
+  },
+  { 
+    src: "https://images.unsplash.com/photo-1587440871875-191322ee64b0?auto=format&fit=crop&w=1200&q=80", 
+    url: "https://images.unsplash.com/photo-1587440871875-191322ee64b0?auto=format&fit=crop&w=1200&q=80", 
+    caption: "Custom Mechanical Switches & Tactile Feedback" 
+  },
+  { 
+    src: "https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?auto=format&fit=crop&w=1200&q=80", 
+    url: "https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?auto=format&fit=crop&w=1200&q=80", 
+    caption: "Modern Workstation & Flow State Typing" 
+  },
+  { 
+    src: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80", 
+    url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80", 
+    caption: "Collaborative Remote Engineering Setup" 
+  },
+  { 
+    src: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80", 
+    url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80", 
+    caption: "Code Syntax Mastery & High-Speed Keystrokes" 
+  },
+  { 
+    src: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80", 
+    url: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80", 
+    caption: "Dark Theme Terminal & Real-Time Analytics" 
+  }
 ];

@@ -15,6 +15,7 @@
 -- ====================================================================
 
 DROP VIEW  IF EXISTS user_stats;
+DROP TABLE IF EXISTS user_badges       CASCADE;
 DROP TABLE IF EXISTS feedback          CASCADE;
 DROP TABLE IF EXISTS practice_sessions CASCADE;
 DROP TABLE IF EXISTS test_history      CASCADE;
