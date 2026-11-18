@@ -17,7 +17,7 @@ import FeedbackPage from './pages/FeedbackPage';
 import LoginPage from './pages/LoginPage';
 import {
   getHistory, saveTestResult, savePracticeSession,
-  updateUser, saveBadge, clearHistory
+  getUser, updateUser, saveBadge, clearHistory
 } from './lib/api';
 
 export default function App() {
@@ -273,72 +273,65 @@ export default function App() {
 
   const handleTestFinished = async (result) => {
     setLastResult(result);
-    const targetUserId = user ? user.id : 1;
 
-    // 1. Immediately save to PostgreSQL database
-    try {
-      await saveTestResult(targetUserId, {
-        wpm:           Number(result.wpm) || 0,
-        raw_wpm:       Number(result.raw_wpm || result.wpm) || 0,
-        accuracy:      Number(result.accuracy) || 0,
-        errors:        Number(result.errors) || 0,
-        correct_chars: Number(result.correct) || 0,
-        total_chars:   Number(result.total_chars) || (Number(result.correct) || 0) + (Number(result.errors) || 0),
-        missed_keys:   result.missed_keys || [],
-        duration:      Number(result.duration) || selectedDuration,
-        elapsed_secs:  Number(result.elapsed_secs) || selectedDuration,
-        passage_id:    Number(result.passage_id) || 0,
-        typed_date:    result.date || new Date().toLocaleDateString(),
-      });
+    const newRecord = {
+      id: Date.now(),
+      wpm: Number(result.wpm) || 0,
+      raw_wpm: Number(result.raw_wpm || result.wpm) || 0,
+      accuracy: Math.round(Number(result.accuracy)) || 100,
+      errors: Number(result.errors) || 0,
+      correct: Number(result.correct) || 0,
+      duration: Number(result.duration) || selectedDuration,
+      date: result.date || new Date().toLocaleDateString(),
+    };
 
-      // 2. Fetch fresh updated history directly from PostgreSQL
-      const hist = await getHistory(targetUserId);
-      if (Array.isArray(hist) && hist.length > 0) {
-        const mapped = hist.map(r => ({
-          id: r.id,
-          wpm: Number(r.wpm) || 0,
-          raw_wpm: Number(r.raw_wpm) || Number(r.wpm) || 0,
-          accuracy: Math.round(Number(r.accuracy)) || 0,
-          errors: Number(r.errors) || 0,
-          correct: Number(r.correct_chars) || 0,
-          duration: Number(r.duration) || 60,
-          date: r.typed_date || new Date(r.created_at).toLocaleDateString(),
-        }));
-        setHistory(mapped);
-        localStorage.setItem("quickTypeHistory", JSON.stringify(mapped));
-        updateStreakAndBadges(mapped, practiceCount);
-      } else {
-        const newHist = [result, ...history].slice(0, 30);
-        setHistory(newHist);
-        localStorage.setItem("quickTypeHistory", JSON.stringify(newHist));
-        updateStreakAndBadges(newHist, practiceCount);
+    // Immediately update local history state and localStorage for instant UI response
+    setHistory(prev => {
+      const filtered = prev.filter(h => h.id !== newRecord.id);
+      const updated = [newRecord, ...filtered].slice(0, 30);
+      try {
+        localStorage.setItem("quickTypeHistory", JSON.stringify(updated));
+      } catch (e) {
+        console.warn("Storage save error:", e);
       }
+      return updated;
+    });
 
-      // 3. Update user object from PostgreSQL if logged in
-      if (user) {
-        try {
-          const freshUser = await getUser(user.id);
-          if (freshUser && freshUser.id) {
-            setUser(freshUser);
-            localStorage.setItem("quickTypeUser", JSON.stringify(freshUser));
-          }
-        } catch {
-          setUser(prev => prev ? { ...prev, total_tests: (prev.total_tests || 0) + 1 } : prev);
+    updateStreakAndBadges([newRecord, ...history], practiceCount);
+
+    // If a user is logged in, sync with database asynchronously
+    if (user?.id) {
+      setUser(prev => prev ? { ...prev, total_tests: (prev?.total_tests || 0) + 1 } : prev);
+      try {
+        await saveTestResult(user.id, {
+          wpm:           newRecord.wpm,
+          raw_wpm:       newRecord.raw_wpm,
+          accuracy:      newRecord.accuracy,
+          errors:        newRecord.errors,
+          correct_chars: newRecord.correct,
+          total_chars:   Number(result.total_chars) || (newRecord.correct + newRecord.errors),
+          missed_keys:   result.missed_keys || [],
+          duration:      newRecord.duration,
+          elapsed_secs:  Number(result.elapsed_secs) || newRecord.duration,
+          passage_id:    Number(result.passage_id) || 0,
+          typed_date:    newRecord.date,
+        });
+
+        const freshUser = await getUser(user.id).catch(() => null);
+        if (freshUser && freshUser.id) {
+          setUser(prev => ({ ...prev, ...freshUser }));
+          localStorage.setItem("quickTypeUser", JSON.stringify({ ...user, ...freshUser }));
         }
+      } catch (err) {
+        console.warn("DB save error:", err.message);
       }
-    } catch (err) {
-      console.warn("DB save error:", err.message);
-      const newHist = [result, ...history].slice(0, 30);
-      setHistory(newHist);
-      localStorage.setItem("quickTypeHistory", JSON.stringify(newHist));
-      updateStreakAndBadges(newHist, practiceCount);
     }
 
     if (result.wpm >= 60 || result.accuracy >= 100) {
       triggerConfetti();
       showToast(`🎉 Phenomenal run! ${result.wpm} WPM at ${result.accuracy}% accuracy.`);
     } else {
-      showToast("Test completed & saved to PostgreSQL! 🎉");
+      showToast("Test completed & saved! 🎉");
     }
   };
 

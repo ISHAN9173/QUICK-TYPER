@@ -47,49 +47,18 @@ const state = {
       password_hash: '$2b$10$VDtXLc0IrCYu8r4Bs3sZjuKQzxzYQscT3ZazbYiJR2Ilhx/EbnD7m', // 12345
       theme: 'indigo',
       goal_wpm: 50,
-      total_tests: 1,
-      total_chars_typed: 185,
-      streak_current: 1,
-      streak_longest: 3,
-      streak_last_date: new Date().toDateString(),
-      practice_count: 5,
-      unlocked_badges: ['first-test', 'speed-40'],
+      total_tests: 0,
+      total_chars_typed: 0,
+      streak_current: 0,
+      streak_longest: 0,
+      streak_last_date: null,
+      practice_count: 0,
+      unlocked_badges: [],
       created_at: new Date()
     }
   ],
-  history: [
-    {
-      id: 1,
-      user_id: 1,
-      wpm: 58,
-      raw_wpm: 62,
-      accuracy: 96.75,
-      errors: 6,
-      correct_chars: 179,
-      total_chars: 185,
-      missed_keys: [{ key: 'e', count: 3 }, { key: 't', count: 2 }],
-      duration: 60,
-      elapsed_secs: 60,
-      passage_id: 1,
-      typed_date: new Date().toLocaleDateString(),
-      created_at: new Date()
-    }
-  ],
-  practice: [
-    {
-      id: 1,
-      user_id: 1,
-      mode: 'all',
-      wpm: 58,
-      accuracy: 96.0,
-      errors: 2,
-      correct_chars: 48,
-      total_chars: 50,
-      missed_keys: [{ key: 'k', count: 2 }],
-      pattern_used: 'quick brown fox',
-      created_at: new Date()
-    }
-  ],
+  history: [],
+  practice: [],
   feedback: [
     {
       id: 1,
