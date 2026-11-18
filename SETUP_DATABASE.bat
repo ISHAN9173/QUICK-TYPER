@@ -1,6 +1,19 @@
 @echo off
+setlocal enabledelayedexpansion
 title QuickType - PostgreSQL Database Setup
 color 0e
+
+set "BASE_DIR=%~dp0"
+cd /d "%BASE_DIR%"
+
+if exist "server\apply_schema.js" (
+    set "CODE_DIR=%BASE_DIR%"
+) else if exist "quicktype_code\server\apply_schema.js" (
+    set "CODE_DIR=%BASE_DIR%quicktype_code"
+) else (
+    set "CODE_DIR=%BASE_DIR%"
+)
+
 cls
 echo =======================================================================
 echo             QUICKTYPE POSTGRESQL DATABASE SETUP WIZARD
@@ -8,6 +21,8 @@ echo =======================================================================
 echo.
 echo Setting up PostgreSQL database tables for QuickType...
 echo.
+
+cd /d "%CODE_DIR%"
 node server/apply_schema.js
 echo.
 echo =======================================================================
