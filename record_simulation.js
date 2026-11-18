@@ -2,18 +2,24 @@ const { chromium } = require('playwright-core');
 const path = require('path');
 const fs = require('fs');
 
-async function recordComprehensiveSimulation() {
+async function recordFastForwardSimulation() {
   const videoDir = path.join('C:', 'Users', 'parve', 'Downloads', 'video_temp');
   if (fs.existsSync(videoDir)) {
     fs.rmSync(videoDir, { recursive: true, force: true });
   }
   fs.mkdirSync(videoDir, { recursive: true });
 
-  console.log('Launching Chrome (1440x900 HD)...');
+  console.log('Launching fast Chrome (1440x900 HD, zero-lag)...');
   const browser = await chromium.launch({
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     headless: false,
-    args: ['--start-maximized', '--no-sandbox']
+    args: [
+      '--start-maximized',
+      '--no-sandbox',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding'
+    ]
   });
 
   const context = await browser.newContext({
@@ -25,68 +31,76 @@ async function recordComprehensiveSimulation() {
   });
 
   const page = await context.newPage();
-  console.log('1. Loading QuickType website...');
+
+  // Fresh load
   await page.goto('https://quicktype-app.vercel.app', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(2500);
-
-  // ── PART 1: COMPLETE HOMEPAGE TOUR ─────────────────────────
-  console.log('2. Showcasing Full Homepage...');
-
-  // Hero & Interactive Keyboard
-  await page.mouse.move(950, 250);
+  await page.evaluate(() => {
+    localStorage.removeItem('quickTypeHistory');
+    localStorage.removeItem('quickTypeStreak');
+    localStorage.removeItem('quickTypePracticeSessions');
+    localStorage.removeItem('quickTypeBadges');
+  });
+  await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(1000);
-  await page.mouse.move(1050, 300);
-  await page.waitForTimeout(1500);
+
+  // Helper for buttery snappy scroll without lagging
+  const snappyScroll = async (targetY) => {
+    await page.evaluate(async (y) => {
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }, targetY);
+    await page.waitForTimeout(1000);
+  };
+
+  // ── PART 1: HOMEPAGE TOUR (BRISK & SNAPPY) ─────────────────
+  console.log('1. Brisk Homepage Showcase (No lag)...');
+
+  // Quick cursor glide over keyboard
+  await page.mouse.move(960, 240);
+  await page.waitForTimeout(400);
+  await page.mouse.move(1060, 290);
+  await page.waitForTimeout(600);
 
   // Scroll to Marquee & Feature Cards
-  console.log('   -> Marquee & Feature Cards');
-  await page.evaluate(() => window.scrollBy({ top: 500, behavior: 'smooth' }));
-  await page.waitForTimeout(2500);
+  console.log('   -> Feature Cards');
+  await snappyScroll(480);
 
-  // Scroll to Stats Band, Weekly Rhythm & AI Coach
-  console.log('   -> Weekly Rhythm & AI Coach');
-  await page.evaluate(() => window.scrollBy({ top: 550, behavior: 'smooth' }));
-  await page.waitForTimeout(2000);
+  // Scroll to AI Coach & Analytics
+  console.log('   -> AI Coach & Analytics');
+  await snappyScroll(1020);
 
-  // Interact with AI Coach refresh button
   const aiRefreshBtn = page.locator('.btn-ai-refresh');
   if (await aiRefreshBtn.isVisible()) {
     await aiRefreshBtn.click();
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(700);
   }
 
-  // Scroll to Image Gallery Slider & Goal Slider
-  console.log('   -> Gallery & Interactive Goal Slider');
-  await page.evaluate(() => window.scrollBy({ top: 650, behavior: 'smooth' }));
-  await page.waitForTimeout(2000);
+  // Scroll to Image Gallery Slider
+  console.log('   -> Slider & Goal');
+  await snappyScroll(1580);
 
-  // Click next slide arrow
   const nextSlideBtn = page.locator('#typingSlider .slider-arrow-right');
   if (await nextSlideBtn.isVisible()) {
     await nextSlideBtn.click();
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(700);
   }
 
-  // Smoothly scroll back to top of page
-  console.log('   -> Smooth scroll back to navigation header');
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  await page.waitForTimeout(2500);
+  // Fast scroll back to navigation
+  console.log('   -> Fast scroll to top');
+  await snappyScroll(0);
 
-  // ── PART 2: TESTS PAGE ─────────────────────────────────────
-  console.log('3. Navigating to Tests Selection...');
+  // ── PART 2: TESTS SELECTION ─────────────────────────────────
+  console.log('2. Navigating to Tests...');
   await page.click('nav button:has-text("Tests")');
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(900);
 
-  // Start 1 Minute Test
-  console.log('4. Launching 1-Minute Speed Challenge...');
+  console.log('3. Launching 1-Minute Challenge...');
   await page.click('.test-option button:has-text("Start Test")');
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(1000);
 
-  // ── PART 3: ACCURATE 100% CORRECT TYPING SIMULATION ───────
-  console.log('5. Reading exact passage from DOM for 100% accuracy test...');
+  // ── PART 3: ACCURATE ~50 WPM TYPING ─────────────────────────
+  console.log('4. Reading exact passage from DOM...');
   await page.waitForSelector('.reference-text');
 
-  // Extract the exact words from the DOM
   const exactPassage = await page.evaluate(() => {
     const wordEls = Array.from(document.querySelectorAll('.reference-text .word'));
     return wordEls.map(w => {
@@ -95,47 +109,63 @@ async function recordComprehensiveSimulation() {
     }).join(' ');
   });
 
-  console.log('   -> Actual Passage detected (' + exactPassage.length + ' chars)');
-
   const input = page.locator('#typingInput');
   await input.click();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(300);
 
-  // Type the first ~130 characters of the EXACT passage
-  const charsToType = Math.min(130, exactPassage.length);
-  console.log('   -> Typing ' + charsToType + ' exact characters (all green/correct)...');
+  // 30 characters / 5 = 6 words.
+  // At 50 WPM: (6 words / 50) * 60 = 7.2 seconds.
+  // 30 keystrokes in 7.2s = 240ms per keystroke.
+  const charsToType = Math.min(30, exactPassage.length);
+  console.log(`   -> Fluid ~50 WPM typing: ${charsToType} exact characters...`);
 
+  const typingStart = Date.now();
   for (let i = 0; i < charsToType; i++) {
     const char = exactPassage[i];
-    await page.keyboard.type(char, { delay: Math.floor(Math.random() * 25) + 40 });
+    const delay = char === ' ' ? 260 : Math.floor(Math.random() * 30) + 225;
+    await page.keyboard.type(char, { delay });
   }
 
+  const elapsedTyping = Date.now() - typingStart;
+  const targetDurationMs = 7200;
+  if (elapsedTyping < targetDurationMs) {
+    await page.waitForTimeout(targetDurationMs - elapsedTyping);
+  }
+
+  console.log(`   -> Finished typing in ${( (Date.now() - typingStart) / 1000 ).toFixed(1)}s`);
+  await page.waitForTimeout(400);
+
+  // ── PART 4: FINISH & CONFETTI ──────────────────────────────
+  console.log('5. Clicking Finish & Save Test...');
+  await page.click('button:has-text("✓ Finish & Save Test")');
+  await page.waitForTimeout(2200); // Snappy confetti & celebration showcase
+
+  // ── PART 5: CERTIFICATE ────────────────────────────────────
+  console.log('6. Viewing Certificate of Achievement...');
+  await page.click('.result button:has-text("Certificate")');
+  await page.waitForTimeout(2000); // Clean 2s showcase of certificate
+
+  // ── PART 6: PROGRESS ANALYTICS ─────────────────────────────
+  console.log('7. Viewing Progress Analytics & Updated Stats...');
+  const progressBtn = page.locator('button:has-text("View Progress Analytics")');
+  if (await progressBtn.isVisible()) {
+    await progressBtn.click();
+  } else {
+    await page.click('nav button:has-text("Progress")');
+  }
+  await page.waitForTimeout(1000);
+
+  // Scroll to show the updated history record cleanly
+  await snappyScroll(300);
+  await page.waitForTimeout(2200); // 2.2s showcase of updated 50 WPM score & history item
+
+  // ── PART 7: FAST RETURN TO HOME ────────────────────────────
+  console.log('8. Returning to Home Page...');
+  await page.click('nav button:has-text("Home")');
   await page.waitForTimeout(1500);
 
-  // ── PART 4: FINISH, SAVE & CONFETTI CELEBRATION ────────────
-  console.log('6. Finishing & Saving Test (Triggering Confetti)...');
-  await page.click('button:has-text("✓ Finish & Save Test")');
-  await page.waitForTimeout(4000); // Capture confetti & 100% accuracy results card
-
-  // ── PART 5: CERTIFICATE OF ACHIEVEMENT ─────────────────────
-  console.log('7. Viewing Certificate of Achievement...');
-  await page.click('.result button:has-text("Certificate")');
-  await page.waitForTimeout(3500);
-
-  // ── PART 6: PROGRESS ANALYTICS & HISTORY ───────────────────
-  console.log('8. Inspecting Progress Analytics & History List...');
-  await page.click('button:has-text("View Progress Analytics")');
-  await page.waitForTimeout(2500);
-  await page.evaluate(() => window.scrollBy({ top: 350, behavior: 'smooth' }));
-  await page.waitForTimeout(3000);
-
-  // ── PART 7: FINAL WRAP-UP ON HOME ──────────────────────────
-  console.log('9. Returning to Home with updated real-time score...');
-  await page.click('nav button:has-text("Home")');
-  await page.waitForTimeout(3000);
-
   // Finalize video
-  console.log('Finalizing video file...');
+  console.log('Closing browser & finalizing video...');
   await context.close();
   await browser.close();
 
@@ -146,11 +176,11 @@ async function recordComprehensiveSimulation() {
     const finalVideo = path.join('C:', 'Users', 'parve', 'Downloads', 'QuickType_Live_Simulation.webm');
     if (fs.existsSync(finalVideo)) fs.unlinkSync(finalVideo);
     fs.renameSync(srcVideo, finalVideo);
-    console.log('SUCCESS! Video generated at:', finalVideo);
+    console.log('SUCCESS: Fast-forwarded video generated at:', finalVideo);
   }
 }
 
-recordComprehensiveSimulation().catch(err => {
-  console.error('Recording error:', err);
+recordFastForwardSimulation().catch(err => {
+  console.error('Error:', err);
   process.exit(1);
 });
